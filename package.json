@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && node scripts/generate-sitemap.mjs",
+    "build": "tsc --noEmit && vite build && node scripts/postbuild.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "start": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
     "images": "node scripts/fetch-images.mjs",
-    "sitemap": "node scripts/generate-sitemap.mjs"
+    "prerender": "node scripts/postbuild.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
@@ -25,6 +25,7 @@
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
+    "esbuild": "^0.21.5",
     "potrace": "^2.1.8",
     "sass": "^1.80.3",
     "sharp": "^0.33.5",

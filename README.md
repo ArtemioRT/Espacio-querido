@@ -93,6 +93,15 @@ Las imágenes del sitio actual se descargan y convierten automáticamente (WebP 
 
 Las URLs y nombres están en `scripts/images.manifest.json`. Para revisar que cada foto del equipo tenga el nombre correcto abre `scripts/team-preview.html`; si alguna no coincide, cambia su `photo` en `src/utils/team.json`.
 
+### 5.1 SEO y pre-render
+`npm run build` compila la app y después ejecuta `scripts/postbuild.mjs`, que:
+- genera un HTML estático por página pública (inicio, catálogo, cada propiedad, aviso) con su contenido, metas, Open Graph y datos estructurados schema.org, para buscadores y bots de IA que no ejecutan JavaScript;
+- crea `sitemap.xml` con todas las propiedades y sus fotos, y ajusta `robots.txt` y `llms.txt` al dominio de `VITE_SITE_URL`.
+
+Requiere en Render las variables `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `VITE_SITE_URL`.
+Las propiedades nuevas obtienen su página pre-renderizada en el siguiente deploy; la acción
+**"Regenerar páginas"** lo hace cada día (configura el secreto `RENDER_DEPLOY_HOOK`, ver `.github/workflows/redeploy.yml`).
+
 ### 6. Deploy
 Es una SPA: configura el fallback a `index.html` (Vercel/Netlify lo hacen automático; en Netlify agrega `/* /index.html 200` en `public/_redirects`).
 

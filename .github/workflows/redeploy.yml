@@ -1,0 +1,27 @@
+name: Regenerar páginas (pre-render y sitemap)
+
+# Vuelve a desplegar en Render para que las propiedades nuevas o editadas tengan su
+# HTML pre-renderizado y aparezcan en el sitemap.
+#
+# Configuración (una sola vez):
+#   1. Render → tu servicio → Settings → Deploy Hook → copia la URL.
+#   2. GitHub → Settings → Secrets and variables → Actions → New repository secret
+#      Nombre: RENDER_DEPLOY_HOOK   Valor: la URL del paso 1
+on:
+  schedule:
+    - cron: '0 9 * * *' # todos los días a las 3:00 a. m. (hora de Monterrey)
+  workflow_dispatch:
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar al Deploy Hook de Render
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::warning::Falta el secreto RENDER_DEPLOY_HOOK (ver instrucciones en este archivo)."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK" && echo "Deploy solicitado"
