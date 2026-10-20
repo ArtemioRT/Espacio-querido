@@ -48,6 +48,9 @@ export default function ImageManager({ images, onChange, onRemove, maxFiles = 40
     onChange(next);
   };
 
+  const setCaption = (i: number, caption: string) =>
+    onChange(images.map((img, idx) => (idx === i ? { ...img, caption: caption.slice(0, 140) } : img)));
+
   const remove = (i: number) => {
     const img = images[i];
     if (img.file) URL.revokeObjectURL(img.url);
@@ -80,7 +83,7 @@ export default function ImageManager({ images, onChange, onRemove, maxFiles = 40
       >
         <ImagePlus />
         <strong>Arrastra tus fotos aquí o haz clic para seleccionarlas</strong>
-        <span>JPG, PNG o WEBP · máx. 10 MB cada una · la primera foto será la portada</span>
+        <span>JPG, PNG o WEBP · máx. 10 MB cada una · la primera foto será la portada · describe cada foto para SEO y accesibilidad</span>
         <input
           ref={inputRef}
           type="file"
@@ -141,6 +144,15 @@ export default function ImageManager({ images, onChange, onRemove, maxFiles = 40
                   <Trash2 />
                 </button>
               </div>
+              <input
+                className={styles.caption}
+                value={img.caption ?? ''}
+                onChange={(e) => setCaption(i, e.target.value)}
+                placeholder="Descripción (texto alternativo)"
+                aria-label={`Descripción de la foto ${i + 1}`}
+                onMouseDown={(e) => e.stopPropagation()}
+                draggable={false}
+              />
             </li>
           ))}
         </ul>

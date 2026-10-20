@@ -8,12 +8,15 @@ import styles from './PropertyGallery.module.scss';
 
 interface Props {
   images: string[];
+  /** Descripción de cada foto (caption); si falta se genera a partir del título */
+  captions?: Array<string | null | undefined>;
   title: string;
   propertyId: string;
 }
 
-export default function PropertyGallery({ images: raw, title, propertyId }: Props) {
+export default function PropertyGallery({ images: raw, captions = [], title, propertyId }: Props) {
   const images = raw.length ? raw : [IMAGES.placeholder];
+  const altFor = (i: number) => captions[i] || `${title} – foto ${i + 1} de ${images.length}`;
   const [index, setIndex] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   useLockBody(lightbox);
@@ -52,7 +55,7 @@ export default function PropertyGallery({ images: raw, title, propertyId }: Prop
         onTouchStart={(e) => setTouchX(e.touches[0].clientX)}
         onTouchEnd={(e) => onTouchEnd(e.changedTouches[0].clientX)}
       >
-        <img src={images[index]} alt={`${title} · foto ${index + 1}`} onClick={open} />
+        <img src={images[index]} alt={altFor(index)} onClick={open} />
         {images.length > 1 && (
           <>
             <button className={cx(styles.nav, styles.prev)} onClick={() => go(-1)} aria-label="Foto anterior">
@@ -72,7 +75,7 @@ export default function PropertyGallery({ images: raw, title, propertyId }: Prop
         <div className={styles.thumbs}>
           {images.map((src, i) => (
             <button key={src + i} className={cx(styles.thumb, i === index && styles.thumbActive)} onClick={() => setIndex(i)} aria-label={`Ver foto ${i + 1}`}>
-              <img src={src} alt="" loading="lazy" />
+              <img src={src} alt={altFor(i)} loading="lazy" />
             </button>
           ))}
         </div>
@@ -88,7 +91,7 @@ export default function PropertyGallery({ images: raw, title, propertyId }: Prop
           </span>
           <img
             src={images[index]}
-            alt={`${title} · foto ${index + 1}`}
+            alt={altFor(index)}
             onTouchStart={(e) => setTouchX(e.touches[0].clientX)}
             onTouchEnd={(e) => onTouchEnd(e.changedTouches[0].clientX)}
           />

@@ -14,7 +14,7 @@ function Member({ name, photo, index }: { name: string; photo: string; index: nu
   return (
     <figure className={styles.member} data-reveal style={{ '--reveal-delay': `${(index % 4) * 80}ms` } as React.CSSProperties}>
       <div className={styles.photo}>
-        {failed ? <span>{initials}</span> : <img src={photo} alt={name} loading="lazy" onError={() => setFailed(true)} />}
+        {failed ? <span>{initials}</span> : <img src={photo} alt={`${name}, asesor(a) inmobiliario de Espacio Querido`} loading="lazy" onError={() => setFailed(true)} />}
       </div>
       <figcaption>{name}</figcaption>
     </figure>

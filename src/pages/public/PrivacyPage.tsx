@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { COMPANY } from '@/utils/constants';
 import { CONSENT_KEY } from '@/services/analytics.service';
 import { safeGet, safeSet } from '@/utils/storage';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useSeo } from '@/hooks/useSeo';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
+import { breadcrumbLd, type Crumb } from '@/utils/seo';
+import { PATHS } from '@/app/paths';
 import { cx } from '@/utils/format';
 import styles from './PrivacyPage.module.scss';
 
@@ -11,7 +14,12 @@ import styles from './PrivacyPage.module.scss';
  * demás contra el aviso oficial de la inmobiliaria y ajústalas aquí si hace falta.
  */
 export default function PrivacyPage() {
-  useDocumentTitle('Aviso de privacidad');
+  const crumbs: Crumb[] = [{ label: 'Inicio', to: PATHS.home }, { label: 'Aviso de privacidad' }];
+  useSeo({
+    title: 'Aviso de privacidad',
+    description: 'Conoce cómo Espacio Querido recolecta, usa y protege tus datos personales, y cómo ejercer tus derechos ARCO.',
+    jsonLd: [breadcrumbLd(crumbs)],
+  });
   const [consent, setConsent] = useState(safeGet(CONSENT_KEY));
 
   const update = (v: 'accepted' | 'rejected') => {
@@ -22,6 +30,7 @@ export default function PrivacyPage() {
   return (
     <article className={styles.page}>
       <div className={styles.inner}>
+        <Breadcrumbs items={crumbs} />
         <h1 data-reveal>Aviso de Privacidad</h1>
         <p className={styles.subtitle}>Política de Privacidad de Espacio Querido</p>
 

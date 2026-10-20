@@ -23,7 +23,14 @@ export default function Hero() {
   };
 
   return (
-    <section className={styles.hero} style={{ backgroundImage: `url(${IMAGES.hero})` }}>
+    <section className={styles.hero}>
+      <img
+        src={IMAGES.hero}
+        alt="Casa residencial moderna de dos plantas rodeada de árboles en Monterrey"
+        className={styles.bg}
+        fetchPriority="high"
+        decoding="async"
+      />
       <div className={styles.overlay} />
       <div className={cx('container', styles.content)}>
         <h1>Deja el proceso de elegir una casa en nuestras manos</h1>

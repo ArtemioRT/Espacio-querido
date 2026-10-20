@@ -8,7 +8,7 @@ function BankTile({ name, logo, index }: { name: string; logo: string; index: nu
   const [failed, setFailed] = useState(false);
   return (
     <div className={styles.tile} title={name} data-reveal="zoom" style={{ '--reveal-delay': `${(index % 4) * 90}ms` } as React.CSSProperties}>
-      {failed ? <span>{name}</span> : <img src={logo} alt={name} loading="lazy" onError={() => setFailed(true)} />}
+      {failed ? <span>{name}</span> : <img src={logo} alt={`Logo de ${name}, opción de crédito hipotecario`} loading="lazy" onError={() => setFailed(true)} />}
     </div>
   );
 }

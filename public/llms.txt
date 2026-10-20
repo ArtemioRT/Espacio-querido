@@ -1,0 +1,38 @@
+# Espacio Querido
+
+> Inmobiliaria en Monterrey, Nuevo León (México). Asesora a personas y familias en la compra, venta, renta e inversión de casas, departamentos, terrenos, oficinas y locales comerciales en Monterrey y su área metropolitana, con acompañamiento en créditos hipotecarios.
+
+- Sitio: https://espacioquerido.mx
+- Dirección: Plaza La Salle Norte, Francisco Garza Sada 2925, Chepevera, 64030 Monterrey, N.L., México
+- Teléfono / WhatsApp: +52 812 867 2791
+- Correo: hola@espacioquerido.mx
+- Idioma: español (México) · Moneda de precios: MXN (algunas en USD)
+
+## Servicios
+
+- Venta: estudio de mercado y opinión de valor, precalificación de clientes, agenda de visitas, fotografía de la propiedad y publicidad pagada en portales inmobiliarios.
+- Compra: consultoría de compra gratuita para entender necesidades, presupuesto y opciones de financiamiento.
+- Renta: búsqueda de inmuebles en renta y administración para propietarios que quieren rentar su propiedad.
+- Inversión: consultoría para elegir la mejor opción según el perfil y los objetivos del inversionista (retorno y plusvalía de la zona).
+- Financiamiento: Banamex, Banorte, Banregio, HSBC, Santander, Afirme, Scotiabank, Inbursa, BanBajío, Infonavit, Cofinavit y Sofomes.
+
+## Páginas principales
+
+- [Inicio](https://espacioquerido.mx/): servicios, equipo de asesores, financiamientos, formulario de contacto y preguntas frecuentes.
+- [Catálogo de propiedades](https://espacioquerido.mx/propiedades): buscador por operación (venta/renta), tipo, estado, municipio, colonia, precio, recámaras, baños, estacionamientos, metros de construcción y de terreno, y amenidades.
+- [Propiedades en venta](https://espacioquerido.mx/propiedades?operation=sale)
+- [Propiedades en renta](https://espacioquerido.mx/propiedades?operation=rent)
+- [Aviso de privacidad](https://espacioquerido.mx/aviso-de-privacidad)
+
+Cada propiedad tiene una página con ID, ubicación, precio, características, amenidades, mapa, galería y el asesor asignado: `https://espacioquerido.mx/propiedades/{slug}`. Todas incluyen datos estructurados schema.org (RealEstateListing). El listado completo y actualizado está en el sitemap.
+
+## Preguntas frecuentes
+
+- ¿Qué necesito para vender mi propiedad? Tener la papelería en orden (escritura, predial, INE, recibos y datos generales); después el equipo revisa si aplica la exención de impuestos.
+- ¿Cómo saber si una propiedad tiene adeudos? El proceso de compra incluye integrar el expediente e investigar la propiedad antes de la firma para verificar que esté al corriente en servicios e impuestos.
+- ¿Qué revisar al comprar? La situación legal; en preventas, la licencia de construcción y la experiencia del desarrollador; para inversión, el retorno y la plusvalía de la zona.
+- ¿Gastos al comprar? Contemplar al menos 10% del valor como enganche, además de gastos notariales e ISAI, que suman entre 5% y 6% del valor de la operación.
+
+## Opcional
+
+- [Sitemap](https://espacioquerido.mx/sitemap.xml)

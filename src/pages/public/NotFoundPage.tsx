@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { PATHS } from '@/app/paths';
+import { useSeo } from '@/hooks/useSeo';
 
 export default function NotFoundPage({ message = 'La página que buscas no existe o fue movida.' }: { message?: string }) {
+  useSeo({ title: 'Página no encontrada', noindex: true });
   return (
     <div className="container" style={{ padding: '96px 16px', textAlign: 'center' }}>
       <p style={{ fontFamily: 'var(--serif, "Playfair Display", serif)', fontSize: 72, color: '#9b1b3a', margin: 0 }}>404</p>

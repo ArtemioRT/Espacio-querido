@@ -17,7 +17,7 @@ export default function Services() {
           {SERVICES.map((s, i) => (
             <article key={s.id} className={styles.card} data-reveal style={{ '--reveal-delay': `${i * 120}ms` } as React.CSSProperties}>
               <div className={styles.media}>
-                <img src={s.image} alt={s.title} loading="lazy" />
+                <img src={s.image} alt={s.alt} loading="lazy" width={252} height={282} />
               </div>
               <div className={styles.body}>
                 <h3>{s.title}</h3>

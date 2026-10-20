@@ -1,0 +1,27 @@
+# Espacio Querido
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /propiedades/*/ficha
+
+# Buscadores con IA (permitidos para que recomienden el sitio)
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://espacioquerido.mx/sitemap.xml

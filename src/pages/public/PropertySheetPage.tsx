@@ -85,11 +85,11 @@ export default function PropertySheetPage() {
           {formatPrice(p.price, p.currency, p.operation_type)} {p.currency === 'MXN' && 'MXN'}
         </p>
 
-        {photos[0] && <img src={photos[0]} alt="" className={styles.cover} />}
+        {photos[0] && <img src={photos[0]} alt={`Fotografía principal: ${p.title}`} className={styles.cover} />}
         {photos.length > 1 && (
           <div className={styles.thumbs}>
-            {photos.slice(1, 5).map((src) => (
-              <img key={src} src={src} alt="" />
+            {photos.slice(1, 5).map((src, i) => (
+              <img key={src} src={src} alt={`${p.title} – foto ${i + 2}`} />
             ))}
           </div>
         )}

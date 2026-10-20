@@ -18,7 +18,7 @@ export default function PropertyCard({ property: p }: { property: Property }) {
       <div className={styles.media}>
         <img
           src={!imgError && p.cover_image_url ? p.cover_image_url : IMAGES.placeholder}
-          alt={p.title}
+          alt={`${PROPERTY_TYPE_LABELS[p.property_type]} en ${p.operation_type === 'sale' ? 'venta' : 'renta'}${locationLabel(p) ? ` en ${locationLabel(p)}` : ''}: ${p.title}`}
           loading="lazy"
           onError={() => setImgError(true)}
         />

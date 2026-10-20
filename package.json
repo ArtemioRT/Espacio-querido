@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/generate-sitemap.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "start": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
-    "images": "node scripts/fetch-images.mjs"
+    "images": "node scripts/fetch-images.mjs",
+    "sitemap": "node scripts/generate-sitemap.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

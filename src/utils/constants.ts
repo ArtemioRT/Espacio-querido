@@ -8,12 +8,27 @@ export const COMPANY = {
   addressLine1: 'Plaza La Salle Norte',
   addressLine2: 'Francisco Garza Sada 2925, Chepevera, 64030 Monterrey, N.L.',
   whatsapp: import.meta.env.VITE_WHATSAPP_NUMBER || '528128672791',
+  // SEO local / GEO. ⚠️ Verifica las coordenadas exactas de la oficina en Google Maps
+  street: 'Francisco Garza Sada 2925, Plaza La Salle Norte',
+  neighborhood: 'Chepevera',
+  city: 'Monterrey',
+  region: 'Nuevo León',
+  regionCode: 'MX-NLE',
+  postalCode: '64030',
+  country: 'MX',
+  geo: { lat: 25.6939, lng: -100.3445 },
+  areaServed: ['Monterrey', 'Área metropolitana de Monterrey', 'Nuevo León'],
+  // Opcional: horario en formato schema.org, p. ej. ['Mo-Fr 09:00-19:00', 'Sa 10:00-14:00']
+  openingHours: [] as string[],
+  // ⚠️ Confirma que estas sean las cuentas reales antes de publicar
   social: {
     facebook: 'https://www.facebook.com/espacioquerido',
     instagram: 'https://www.instagram.com/espacioquerido',
     linkedin: 'https://www.linkedin.com/company/espacioquerido',
   },
 };
+
+export const SITE_URL = (import.meta.env.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://espacioquerido.mx')).replace(/\/$/, '');
 
 export const whatsappUrl = (text: string) =>
   `https://wa.me/${COMPANY.whatsapp}?text=${encodeURIComponent(text)}`;

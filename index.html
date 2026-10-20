@@ -4,17 +4,46 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Espacio Querido | Bienes raíces en Monterrey</title>
-    <meta name="description" content="Compra, venta, renta e inversión inmobiliaria en Monterrey. Asesoría experta con Espacio Querido." />
+    <meta name="description" content="Compra, venta, renta e inversión inmobiliaria en Monterrey y su área metropolitana. Asesoría experta, financiamientos y catálogo de propiedades con Espacio Querido." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#9b1b3a" />
+    <link rel="canonical" href="https://espacioquerido.mx/" />
+
+    <!-- GEO: SEO local (verifica coordenadas en src/utils/constants.ts y aquí) -->
+    <meta name="geo.region" content="MX-NLE" />
+    <meta name="geo.placename" content="Monterrey, Nuevo León" />
+    <meta name="geo.position" content="25.6939;-100.3445" />
+    <meta name="ICBM" content="25.6939, -100.3445" />
+
+    <!-- Open Graph / redes sociales -->
+    <meta property="og:site_name" content="Espacio Querido" />
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Espacio Querido | Bienes raíces en Monterrey" />
+    <meta property="og:description" content="Deja el proceso de elegir una casa en nuestras manos. Compra, venta, renta e inversión en Monterrey." />
+    <meta property="og:image" content="https://espacioquerido.mx/images/hero.webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Para asistentes de IA: resumen del sitio -->
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
+
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/images/favicon.png" />
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
+    <link rel="preload" as="image" href="/images/hero.webp" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>
+    <!-- Contenido de respaldo para rastreadores sin JavaScript -->
+    <noscript>
+      <h1>Espacio Querido · Bienes raíces en Monterrey</h1>
+      <p>Inmobiliaria en Monterrey, Nuevo León. Asesoría en compra, venta, renta e inversión de casas, departamentos, terrenos y locales comerciales, con apoyo en créditos hipotecarios (Banamex, Banorte, Banregio, HSBC, Santander, Afirme, Scotiabank, Inbursa, BanBajío, Infonavit, Cofinavit y Sofomes).</p>
+      <p>Plaza La Salle Norte, Francisco Garza Sada 2925, Chepevera, 64030 Monterrey, N.L. · Tel. +52 812 867 2791 · hola@espacioquerido.mx</p>
+      <p><a href="/propiedades">Ver catálogo de propiedades</a> · <a href="/aviso-de-privacidad">Aviso de privacidad</a></p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

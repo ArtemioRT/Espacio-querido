@@ -21,6 +21,7 @@ export interface ServiceItem {
   image: string;
   lines: string[];
   cta: string;
+  alt: string;
 }
 
 export const SERVICES: ServiceItem[] = [
@@ -28,6 +29,7 @@ export const SERVICES: ServiceItem[] = [
     id: 'venta',
     title: 'Venta',
     image: '/images/services/venta.webp',
+    alt: 'Fachada de casa moderna en venta',
     lines: ['¿Necesitas vender tu casa?', 'Te asesoramos, apoyamos y acompañamos durante todo el proceso.'],
     cta: '¡Quiero vender!',
   },
@@ -35,6 +37,7 @@ export const SERVICES: ServiceItem[] = [
     id: 'compra',
     title: 'Compra',
     image: '/images/services/compra.webp',
+    alt: 'Entrega de llaves de una casa a sus nuevos dueños',
     lines: [
       'Te apoyamos con las mejores opciones del mercado, de acuerdo a tus necesidades y presupuesto.',
       '¡Agenda tu consultoría de compra!',
@@ -45,6 +48,7 @@ export const SERVICES: ServiceItem[] = [
     id: 'renta',
     title: 'Renta',
     image: '/images/services/renta.webp',
+    alt: 'Casa contemporánea con jardín disponible en renta',
     lines: [
       '¿Buscas una propiedad para rentar o quieres generar ingresos rentando tu inmueble?',
       '¡Nosotros te ayudamos!',
@@ -55,6 +59,7 @@ export const SERVICES: ServiceItem[] = [
     id: 'inversion',
     title: 'Inversión',
     image: '/images/services/inversion.webp',
+    alt: 'Edificio de departamentos como opción de inversión inmobiliaria',
     lines: ['¿Quieres conocer distintas opciones de inversión?', '¡Agenda tu consultoría de inversión!'],
     cta: '¡Quiero invertir!',
   },

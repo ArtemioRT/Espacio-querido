@@ -10,12 +10,35 @@ import {
 import { trackEvent } from '@/services/analytics.service';
 import { getPublicAgent } from '@/services/agents.service';
 import Avatar from '@/components/ui/Avatar';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useSeo } from '@/hooks/useSeo';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
+import { breadcrumbLd, itemListLd, type Crumb } from '@/utils/seo';
+import { PATHS, propertyUrl } from '@/app/paths';
 import { useLockBody } from '@/hooks/useLockBody';
 import { OPERATION_LABELS, PAGE_SIZE, PROPERTY_TYPE_LABELS } from '@/utils/constants';
 import { cx, formatNumber } from '@/utils/format';
 import type { OperationType, Property, PropertyType, PublicAgent } from '@/types';
 import styles from './PropertiesPage.module.scss';
+
+const TYPE_PLURAL: Record<PropertyType, string> = {
+  casa: 'Casas',
+  departamento: 'Departamentos',
+  terreno: 'Terrenos',
+  oficina: 'Oficinas',
+  local: 'Locales comerciales',
+  bodega: 'Bodegas y naves',
+  otro: 'Propiedades',
+};
+
+/** "Casas en venta en Cumbres, Monterrey" a partir de los filtros indexables */
+function headingFor(f: PropertySearchFilters): string {
+  const what = f.type ? TYPE_PLURAL[f.type] : 'Propiedades';
+  const op = f.operation === 'sale' ? ' en venta' : f.operation === 'rent' ? ' en renta' : ' en venta y renta';
+  const where = f.neighborhood ? `${f.neighborhood}, ${f.city}` : f.city ? `${f.city}, ${f.state}` : f.state ? f.state : 'Monterrey y Nuevo León';
+  return `${what}${op} en ${where}`;
+}
+
+const INDEXABLE = ['operation', 'type', 'state', 'city', 'neighborhood', 'page'];
 
 const num = (v: string | null) => (v && Number(v) > 0 ? Number(v) : undefined);
 
@@ -78,7 +101,33 @@ export default function PropertiesPage() {
     else setAgent(null);
   }, [filters.agent]);
 
-  useDocumentTitle('Propiedades en venta y renta', 'Encuentra casas, departamentos y terrenos en venta y renta con Espacio Querido.');
+  // ---------- SEO ----------
+  const heading = agent ? `Propiedades de ${agent.full_name}` : headingFor(filters);
+  const canonicalParams = new URLSearchParams();
+  INDEXABLE.forEach((k) => {
+    const v = searchParams.get(k);
+    if (v) canonicalParams.set(k, v);
+  });
+  // Combinaciones con precio, medidas, texto libre, etc. no se indexan (evita páginas duplicadas)
+  const hasNonIndexable = [...searchParams.keys()].some((k) => !INDEXABLE.includes(k) && k !== 'sort');
+
+  const crumbs: Crumb[] = [{ label: 'Inicio', to: PATHS.home }, { label: 'Propiedades', to: PATHS.properties }];
+  if (filters.state) crumbs.push({ label: filters.state, to: `${PATHS.properties}?state=${encodeURIComponent(filters.state)}` });
+  if (filters.state && filters.city)
+    crumbs.push({ label: filters.city, to: `${PATHS.properties}?state=${encodeURIComponent(filters.state)}&city=${encodeURIComponent(filters.city)}` });
+  if (filters.state && filters.city && filters.neighborhood)
+    crumbs.push({
+      label: filters.neighborhood,
+      to: `${PATHS.properties}?state=${encodeURIComponent(filters.state)}&city=${encodeURIComponent(filters.city)}&neighborhood=${encodeURIComponent(filters.neighborhood)}`,
+    });
+
+  useSeo({
+    title: (filters.page ?? 1) > 1 ? `${heading} – página ${filters.page}` : heading,
+    description: `${heading}. ${count ? `${count} opciones disponibles` : 'Catálogo actualizado'} con fotos, precios y asesoría de Espacio Querido.`,
+    canonical: `${PATHS.properties}${canonicalParams.toString() ? `?${canonicalParams}` : ''}`,
+    noindex: hasNonIndexable || !!filters.agent,
+    jsonLd: [breadcrumbLd(crumbs), ...(items.length ? [itemListLd(items, (p) => propertyUrl(p.slug))] : [])],
+  });
   useLockBody(drawer);
 
   useEffect(() => {
@@ -161,6 +210,7 @@ export default function PropertiesPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <div className="container">
+          <Breadcrumbs items={crumbs} light />
           {agent ? (
             <div className={styles.agentHead}>
               <Avatar name={agent.full_name} src={agent.avatar_url} size={64} />
@@ -171,7 +221,7 @@ export default function PropertiesPage() {
             </div>
           ) : (
             <>
-              <h1>Encuentra tu próximo espacio</h1>
+              <h1>{heading}</h1>
               <p>Casas, departamentos, terrenos y locales seleccionados por nuestros asesores.</p>
             </>
           )}

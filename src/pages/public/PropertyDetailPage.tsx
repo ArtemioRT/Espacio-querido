@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, Bath, BedDouble, Building, Calendar, Car, Check, Frame, Home, MessageCircle, Phone,
+  Bath, BedDouble, Building, Calendar, Car, Check, Frame, Home, MessageCircle, Phone,
 } from 'lucide-react';
-import { PATHS, agentPropertiesUrl } from '@/app/paths';
+import { PATHS, agentPropertiesUrl, propertyUrl } from '@/app/paths';
 import PropertyGallery from '@/components/properties/PropertyGallery';
 import PropertyCard from '@/components/properties/PropertyCard';
 import ShareProperty from '@/components/properties/ShareProperty';
@@ -12,7 +12,9 @@ import Avatar from '@/components/ui/Avatar';
 import { getPropertyBySlug, getSimilarProperties } from '@/services/properties.service';
 import { getPublicAgent, toWhatsappNumber } from '@/services/agents.service';
 import { trackEvent } from '@/services/analytics.service';
-import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { summarize, useSeo } from '@/hooks/useSeo';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
+import { breadcrumbLd, listingLd, type Crumb } from '@/utils/seo';
 import { COMPANY, PROPERTY_TYPE_LABELS } from '@/utils/constants';
 import { IMAGES } from '@/utils/content';
 import { formatNumber, formatPrice } from '@/utils/format';
@@ -27,7 +29,34 @@ export default function PropertyDetailPage() {
   const [similar, setSimilar] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useDocumentTitle(property?.title, property?.description);
+  // ---------- SEO ----------
+  const pp = property;
+  const facet = (params: Record<string, string | null | undefined>) => {
+    const sp = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => v && sp.set(k, v));
+    return `${PATHS.properties}?${sp}`;
+  };
+  const crumbs: Crumb[] = [{ label: 'Inicio', to: PATHS.home }, { label: 'Propiedades', to: PATHS.properties }];
+  if (pp?.state) crumbs.push({ label: pp.state, to: facet({ state: pp.state }) });
+  if (pp?.state && pp.city) crumbs.push({ label: pp.city, to: facet({ state: pp.state, city: pp.city }) });
+  if (pp?.state && pp.city && pp.neighborhood) crumbs.push({ label: pp.neighborhood, to: facet({ state: pp.state, city: pp.city, neighborhood: pp.neighborhood }) });
+  if (pp) crumbs.push({ label: `ID ${pp.code} · ${pp.title}` });
+
+  const seoTitle = pp
+    ? `${PROPERTY_TYPE_LABELS[pp.property_type]} en ${pp.operation_type === 'sale' ? 'venta' : 'renta'} en ${[pp.neighborhood, pp.city].filter(Boolean).join(', ') || pp.title} · ID ${pp.code}`
+    : undefined;
+  const seoDescription = pp
+    ? `${formatPrice(pp.price, pp.currency, pp.operation_type)}${pp.bedrooms ? ` · ${pp.bedrooms} recámaras` : ''}${pp.bathrooms ? ` · ${pp.bathrooms} baños` : ''}${pp.construction_m2 ? ` · ${formatNumber(pp.construction_m2)} m² de construcción` : ''}${pp.land_m2 ? ` · ${formatNumber(pp.land_m2)} m² de terreno` : ''}. ${summarize(pp.description, 90)}`
+    : undefined;
+
+  useSeo({
+    title: seoTitle,
+    description: seoDescription,
+    canonical: pp ? propertyUrl(pp.slug) : undefined,
+    image: pp?.cover_image_url,
+    type: 'article',
+    jsonLd: pp ? [listingLd(pp, propertyUrl(pp.slug), agent), breadcrumbLd(crumbs)] : [],
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -93,11 +122,7 @@ export default function PropertyDetailPage() {
   return (
     <div className={styles.page}>
       <div className="container">
-        <nav className={styles.breadcrumb} aria-label="Ruta">
-          <Link to={PATHS.properties}>
-            <ArrowLeft /> Volver a propiedades
-          </Link>
-        </nav>
+        <Breadcrumbs items={crumbs} />
 
         {finished && (
           <div className={styles.finishedBanner}>
@@ -105,7 +130,12 @@ export default function PropertyDetailPage() {
           </div>
         )}
 
-        <PropertyGallery images={images} title={p.title} propertyId={p.id} />
+        <PropertyGallery
+          images={images}
+          captions={p.images?.length ? p.images.map((i) => i.caption) : []}
+          title={`${typeLabel} en ${[p.neighborhood, p.city].filter(Boolean).join(', ')}`}
+          propertyId={p.id}
+        />
 
         {/* ---------- Encabezado: datos · asesor · contacto ---------- */}
         <header className={styles.head}>
@@ -127,7 +157,7 @@ export default function PropertyDetailPage() {
 
           <div className={styles.photo}>
             {agent ? (
-              <Avatar name={agent.full_name} src={agent.avatar_url} size={232} className={styles.avatar} />
+              <Avatar name={agent.full_name ? `${agent.full_name}, asesor(a) de esta propiedad` : null} src={agent.avatar_url} size={232} className={styles.avatar} />
             ) : (
               <span className={styles.companyLogo}>
                 <img src={IMAGES.logo} alt={COMPANY.name} />
