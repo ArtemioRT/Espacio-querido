@@ -17,6 +17,11 @@ export default defineConfig({
       },
     },
   },
+  // Necesario para servir con `vite preview` en Render (u otro hosting con dominio propio)
+  preview: {
+    host: '0.0.0.0',
+    allowedHosts: true,
+  },
   build: {
     rollupOptions: {
       output: {
