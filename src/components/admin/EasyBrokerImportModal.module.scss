@@ -133,3 +133,25 @@
     transition: width 0.4s $ease;
   }
 }
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  background: $color-bg-soft;
+  border-radius: $radius;
+
+  :global(.select) {
+    width: auto;
+    min-width: 260px;
+    min-height: 38px;
+    background-color: $white;
+  }
+
+  small {
+    font-size: 12px;
+  }
+}

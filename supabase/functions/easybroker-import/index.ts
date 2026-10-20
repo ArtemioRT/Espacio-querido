@@ -6,9 +6,10 @@
 //   supabase functions deploy easybroker-import
 //
 // Body:
-//   { action: 'list', page?: number }
-//   { action: 'ids' }  → todos los public_id (todas las páginas) y si ya están importados
-//   { action: 'import', ids: string[], status?: 'draft' | 'active' | 'paused', agent_id?: string | 'auto' }
+//   { action: 'list', page?: number, statuses?: string[] }
+//     statuses (filtro de EasyBroker): published, not_published, reserved, sold, rented, suspended, flagged, disapproved
+//   { action: 'ids', statuses?: string[] }  → todos los public_id (todas las páginas) y si ya están importados
+//   { action: 'import', ids: string[], status?: 'draft' | 'active' | 'paused' | 'finished', agent_id?: string | 'auto' }
 //     agent_id 'auto' (o vacío): asigna al asesor cuyo correo coincida con el agente de EasyBroker
 // Solo administradores.
 
@@ -189,10 +190,15 @@ Deno.serve(async (req) => {
     const admin = serviceClient();
     const body = await req.json().catch(() => ({}));
 
+    // Filtro por estado de EasyBroker (search[statuses][])
+    const EB_STATUSES = ['published', 'not_published', 'reserved', 'sold', 'rented', 'suspended', 'flagged', 'disapproved'];
+    const statuses: string[] = Array.isArray(body.statuses) ? body.statuses.filter((s: unknown) => EB_STATUSES.includes(String(s))) : [];
+    const statusQuery = statuses.map((s) => `&search[statuses][]=${s}`).join('');
+
     // 2) Listar
     if (body.action === 'list') {
       const page = Math.max(1, Number(body.page) || 1);
-      const res = await ebFetch(`/properties?page=${page}&limit=20`, apiKey);
+      const res = await ebFetch(`/properties?page=${page}&limit=20${statusQuery}`, apiKey);
       const content: Any[] = res.content ?? [];
       const ids = content.map((p) => p.public_id);
       const { data: existing } = ids.length
@@ -210,7 +216,7 @@ Deno.serve(async (req) => {
           property_type: p.property_type,
           operation: p.operations?.[0]?.type ?? null,
           price: p.operations?.[0]?.formatted_amount ?? null,
-          agent: p.agent?.email ?? p.agent?.name ?? null,
+          agent: typeof p.agent === 'string' ? p.agent : p.agent?.email ?? p.agent?.name ?? null,
           imported: imported.has(p.public_id),
         })),
       });
@@ -220,7 +226,7 @@ Deno.serve(async (req) => {
     if (body.action === 'ids') {
       const all: string[] = [];
       for (let page = 1; page <= 200; page++) {
-        const res = await ebFetch(`/properties?page=${page}&limit=50`, apiKey);
+        const res = await ebFetch(`/properties?page=${page}&limit=50${statusQuery}`, apiKey);
         const content: Any[] = res.content ?? [];
         all.push(...content.map((p) => p.public_id).filter(Boolean));
         if (!res.pagination?.next_page || content.length === 0) break;
@@ -236,7 +242,7 @@ Deno.serve(async (req) => {
     // 3) Importar
     if (body.action === 'import') {
       const ids: string[] = Array.isArray(body.ids) ? body.ids.slice(0, 50) : [];
-      const status = ['active', 'paused'].includes(body.status) ? body.status : 'draft';
+      const status = ['active', 'paused', 'finished'].includes(body.status) ? body.status : 'draft';
       if (!ids.length) return json({ error: 'No se enviaron propiedades' }, 400);
 
       const fixedAgent = typeof body.agent_id === 'string' && /^[0-9a-f-]{36}$/i.test(body.agent_id) ? body.agent_id : null;

@@ -2,9 +2,25 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CheckSquare, RefreshCw, Square, XCircle } from 'lucide-react';
 import { Modal } from './AdminUI';
 import Pagination from '@/components/ui/Pagination';
-import { importEasyBrokerProperties, listAllEasyBrokerIds, listEasyBrokerProperties, type ImportStatus } from '@/services/easybroker.service';
+import {
+  importEasyBrokerProperties, listAllEasyBrokerIds, listEasyBrokerProperties, type EbStatus, type ImportStatus,
+} from '@/services/easybroker.service';
+
+/** Filtros por estado de EasyBroker */
+const EB_FILTERS: Array<{ value: string; label: string; statuses: EbStatus[]; suggest?: ImportStatus }> = [
+  { value: 'all', label: 'Todas', statuses: [] },
+  { value: 'published', label: 'Publicadas (activas)', statuses: ['published'], suggest: 'active' },
+  { value: 'inactive', label: 'Inactivas (no publicadas y suspendidas)', statuses: ['not_published', 'suspended'], suggest: 'paused' },
+  { value: 'not_published', label: 'No publicadas', statuses: ['not_published'], suggest: 'paused' },
+  { value: 'suspended', label: 'Suspendidas', statuses: ['suspended'], suggest: 'paused' },
+  { value: 'reserved', label: 'Reservadas', statuses: ['reserved'], suggest: 'draft' },
+  { value: 'closed', label: 'Vendidas o rentadas', statuses: ['sold', 'rented'], suggest: 'finished' },
+  { value: 'sold', label: 'Vendidas', statuses: ['sold'], suggest: 'finished' },
+  { value: 'rented', label: 'Rentadas', statuses: ['rented'], suggest: 'finished' },
+];
 import { listAssignableAgents } from '@/services/agents.service';
 import { cx } from '@/utils/format';
+import { STATUS_LABELS } from '@/utils/constants';
 import type { AgentRef, EasyBrokerImportResult, EasyBrokerListItem } from '@/types';
 import styles from './EasyBrokerImportModal.module.scss';
 
@@ -27,6 +43,8 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
   const [results, setResults] = useState<EasyBrokerImportResult[] | null>(null);
   const [agents, setAgents] = useState<AgentRef[]>([]);
   const [agentId, setAgentId] = useState<string>('auto');
+  const [ebFilter, setEbFilter] = useState('all');
+  const filterDef = EB_FILTERS.find((f) => f.value === ebFilter) ?? EB_FILTERS[0];
   // Selección masiva (todas las páginas)
   const [allIds, setAllIds] = useState<Array<{ public_id: string; imported: boolean }> | null>(null);
   const [loadingAll, setLoadingAll] = useState(false);
@@ -41,7 +59,7 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
     setLoading(true);
     setError('');
     try {
-      const res = await listEasyBrokerProperties(page);
+      const res = await listEasyBrokerProperties(page, filterDef.statuses);
       setItems(res.items);
       setTotal(res.pagination.total ?? res.items.length);
       setLimit(res.pagination.limit ?? 20);
@@ -50,7 +68,8 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
     } finally {
       setLoading(false);
     }
-  }, [page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, ebFilter]);
 
   useEffect(() => {
     if (open) load();
@@ -72,7 +91,7 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
     if (!ids) {
       setLoadingAll(true);
       try {
-        ids = await listAllEasyBrokerIds();
+        ids = await listAllEasyBrokerIds(filterDef.statuses);
         setAllIds(ids);
       } catch (err) {
         setError((err as Error).message);
@@ -85,6 +104,18 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
   };
 
   const pendingCount = allIds?.filter((i) => !i.imported).length;
+
+  // Cambiar el filtro reinicia página, selección y lista completa; sugiere cómo importarlas
+  const changeFilter = (value: string) => {
+    setEbFilter(value);
+    setPage(1);
+    setSelected(new Set());
+    setAllIds(null);
+    setResults(null);
+    setProgress(null);
+    const def = EB_FILTERS.find((f) => f.value === value);
+    if (def?.suggest) setStatus(def.suggest);
+  };
 
   const toggle = (id: string) =>
     setSelected((s) => {
@@ -153,6 +184,7 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
               <option value="draft">Borrador</option>
               <option value="active">Activo (publicar)</option>
               <option value="paused">En pausa</option>
+              <option value="finished">Finalizado (vendida / rentada)</option>
             </select>
             <select className="select" value={agentId} onChange={(e) => setAgentId(e.target.value)} aria-label="Asignar a">
               <option value="auto">Asesor: automático (por correo)</option>
@@ -212,6 +244,20 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
         </div>
       )}
 
+      <div className={styles.filterRow}>
+        <label className="field__label" htmlFor="eb-filter">
+          Estado en EasyBroker
+        </label>
+        <select id="eb-filter" className="select" value={ebFilter} onChange={(e) => changeFilter(e.target.value)} disabled={importing}>
+          {EB_FILTERS.map((f) => (
+            <option key={f.value} value={f.value}>
+              {f.label}
+            </option>
+          ))}
+        </select>
+        {filterDef.suggest && <small className="text-muted">Sugerencia aplicada: importar como “{STATUS_LABELS[filterDef.suggest]}”.</small>}
+      </div>
+
       <div className={styles.toolbar}>
         <label className="checkbox">
           <input type="checkbox" checked={allOnPage} onChange={toggleAll} disabled={!items.length || importing} />
@@ -230,7 +276,7 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
         )}
         <span className="text-muted" style={{ fontSize: 12 }}>
           {selected.size ? `${selected.size.toLocaleString('es-MX')} seleccionadas · ` : ''}
-          {total.toLocaleString('es-MX')} en EasyBroker
+          {total.toLocaleString('es-MX')} {ebFilter === 'all' ? 'en EasyBroker' : `${filterDef.label.toLowerCase()} en EasyBroker`}
         </span>
         <button className="btn btn--ghost btn--sm" onClick={load} disabled={loading}>
           <RefreshCw /> Actualizar

@@ -21,15 +21,18 @@ async function invoke<T>(body: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-export const listEasyBrokerProperties = (page = 1) =>
-  invoke<EasyBrokerListResponse>({ action: 'list', page });
+/** Estados de EasyBroker (search[statuses][]) */
+export type EbStatus = 'published' | 'not_published' | 'reserved' | 'sold' | 'rented' | 'suspended' | 'flagged' | 'disapproved';
+
+export const listEasyBrokerProperties = (page = 1, statuses: EbStatus[] = []) =>
+  invoke<EasyBrokerListResponse>({ action: 'list', page, statuses });
 
 /** Todos los IDs de la cuenta (todas las páginas), indicando cuáles ya están importados */
-export const listAllEasyBrokerIds = () =>
-  invoke<{ items: Array<{ public_id: string; imported: boolean }> }>({ action: 'ids' }).then((r) => r.items);
+export const listAllEasyBrokerIds = (statuses: EbStatus[] = []) =>
+  invoke<{ items: Array<{ public_id: string; imported: boolean }> }>({ action: 'ids', statuses }).then((r) => r.items);
 
 /** agentId: id de un asesor, o 'auto' para asignar por el correo del agente en EasyBroker */
-export type ImportStatus = 'draft' | 'active' | 'paused';
+export type ImportStatus = 'draft' | 'active' | 'paused' | 'finished';
 
 export const importEasyBrokerProperties = (ids: string[], status: ImportStatus, agentId: string | 'auto' = 'auto') =>
   invoke<{ results: EasyBrokerImportResult[] }>({ action: 'import', ids, status, agent_id: agentId });
