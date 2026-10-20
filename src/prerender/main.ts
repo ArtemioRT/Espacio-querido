@@ -19,7 +19,8 @@ import { formatNumber, formatPrice, locationLabel } from '@/utils/format';
 import {
   breadcrumbLd, faqLd, itemListLd, listingLd, organizationLd, websiteLd, type Crumb,
 } from '@/utils/seo';
-import type { Property, PropertyImage, PublicAgent } from '@/types';
+import { catalogPath, facetCrumbs, facetHeading, slugify, TYPE_PLURAL, type CatalogFacet, type FacetNames } from '@/utils/catalog';
+import type { OperationType, Property, PropertyImage, PropertyType, PublicAgent } from '@/types';
 
 interface Ctx {
   site: string;
@@ -51,6 +52,23 @@ const esc = (s: unknown) =>
 const summarize = (text: string | null | undefined, max = 155) => {
   const clean = (text ?? '').replace(/\s+/g, ' ').trim();
   return clean.length <= max ? clean : `${clean.slice(0, clean.lastIndexOf(' ', max - 1))}…`;
+};
+
+const zoneOf = (p: Property) => ({
+  state: p.state_slug || slugify(p.state) || undefined,
+  city: p.city_slug || slugify(p.city) || undefined,
+  neighborhood: p.neighborhood_slug || slugify(p.neighborhood) || undefined,
+});
+
+const matches = (p: Property, f: CatalogFacet) => {
+  const z = zoneOf(p);
+  return (
+    (!f.operation || p.operation_type === f.operation) &&
+    (!f.type || p.property_type === f.type) &&
+    (!f.state || z.state === f.state) &&
+    (!f.city || z.city === f.city) &&
+    (!f.neighborhood || z.neighborhood === f.neighborhood)
+  );
 };
 
 const typeOp = (p: Property) => `${PROPERTY_TYPE_LABELS[p.property_type]} en ${p.operation_type === 'sale' ? 'venta' : 'renta'}`;
@@ -164,20 +182,20 @@ function catalogPage(properties: Property[]): PageMeta {
   const active = properties.filter((p) => p.status === 'active');
   const crumbs: Crumb[] = [{ label: 'Inicio', to: '/' }, { label: 'Propiedades' }];
 
-  // Índice por ubicación (enlaces internos a las facetas)
-  const byPlace = new Map<string, number>();
+  // Índice por ubicación (enlaces internos a las páginas por zona)
+  const byPlace = new Map<string, { label: string; n: number; to: string }>();
   active.forEach((p) => {
-    if (p.state && p.city) {
-      const key = `${p.state}|${p.city}`;
-      byPlace.set(key, (byPlace.get(key) ?? 0) + 1);
+    const z = zoneOf(p);
+    if (z.state && z.city) {
+      const to = catalogPath({ state: z.state, city: z.city });
+      const cur = byPlace.get(to) ?? { label: `${p.city}, ${p.state}`, n: 0, to };
+      cur.n++;
+      byPlace.set(to, cur);
     }
   });
-  const places = [...byPlace.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([k, n]) => {
-      const [state, city] = k.split('|');
-      return `<li><a href="/propiedades?state=${encodeURIComponent(state)}&amp;city=${encodeURIComponent(city)}">${esc(city)}, ${esc(state)}</a> (${n})</li>`;
-    })
+  const places = [...byPlace.values()]
+    .sort((a, b) => b.n - a.n)
+    .map((x) => `<li><a href="${esc(x.to)}">${esc(x.label)}</a> (${x.n})</li>`)
     .join('');
 
   const body = `${header()}
@@ -185,7 +203,10 @@ function catalogPage(properties: Property[]): PageMeta {
   ${crumbsHtml(crumbs)}
   <h1>Propiedades en venta y renta en Monterrey y Nuevo León</h1>
   <p>${active.length} propiedades disponibles: casas, departamentos, terrenos y locales seleccionados por los asesores de Espacio Querido.</p>
-  <p><a href="/propiedades?operation=sale">En venta</a> · <a href="/propiedades?operation=rent">En renta</a></p>
+  <p><a href="/venta">En venta</a> · <a href="/renta">En renta</a> · ${(Object.keys(TYPE_PLURAL) as PropertyType[])
+    .filter((t) => active.some((p) => p.property_type === t))
+    .map((t) => `<a href="${catalogPath({ type: t })}">${esc(TYPE_PLURAL[t])}</a>`)
+    .join(' · ')}</p>
   ${places ? `<h2>Por ubicación</h2><ul>${places}</ul>` : ''}
   <h2>Catálogo</h2>
   <ul class="pr-grid">${active.map(card).join('')}</ul>
@@ -203,12 +224,11 @@ ${footer()}`;
 
 function propertyPage(p: Property, agent: PublicAgent | null, similar: Property[]): PageMeta {
   const url = `/propiedades/${p.slug}`;
-  const facet = (q: Record<string, string>) => `/propiedades?${new URLSearchParams(q)}`;
-  const crumbs: Crumb[] = [{ label: 'Inicio', to: '/' }, { label: 'Propiedades', to: '/propiedades' }];
-  if (p.state) crumbs.push({ label: p.state, to: facet({ state: p.state }) });
-  if (p.state && p.city) crumbs.push({ label: p.city, to: facet({ state: p.state, city: p.city }) });
-  if (p.state && p.city && p.neighborhood) crumbs.push({ label: p.neighborhood, to: facet({ state: p.state, city: p.city, neighborhood: p.neighborhood }) });
-  crumbs.push({ label: `ID ${p.code} · ${p.title}` });
+  const zone: CatalogFacet = { operation: p.operation_type, type: p.property_type, ...zoneOf(p) };
+  const crumbs: Crumb[] = [
+    ...facetCrumbs(zone, { state: p.state ?? undefined, city: p.city ?? undefined, neighborhood: p.neighborhood ?? undefined }),
+    { label: `ID ${p.code} · ${p.title}` },
+  ];
 
   const where = [p.neighborhood, p.city].filter(Boolean).join(', ');
   const title = `${typeOp(p)} en ${where || p.title} · ID ${p.code} | Espacio Querido`;
@@ -255,6 +275,7 @@ function propertyPage(p: Property, agent: PublicAgent | null, similar: Property[
     <h2>Contacta al asesor</h2>
     <p><strong>${esc(contact)}</strong>${agent?.title ? ` · ${esc(agent.title)}` : ''} · Tel. <a href="tel:${esc(phone.replace(/\s/g, ''))}">${esc(phone)}</a></p>
   </article>
+  <p><a href="${esc(catalogPath(zone))}">Ver más ${esc(TYPE_PLURAL[p.property_type].toLowerCase())} en ${p.operation_type === 'sale' ? 'venta' : 'renta'}${p.neighborhood ? ` en ${esc(p.neighborhood)}` : p.city ? ` en ${esc(p.city)}` : ''}</a></p>
   ${similar.length ? `<section><h2>Propiedades similares</h2><ul class="pr-grid">${similar.map(card).join('')}</ul></section>` : ''}
 </main>
 ${footer()}`;
@@ -270,6 +291,100 @@ ${footer()}`;
     image: p.cover_image_url,
     type: 'article',
     jsonLd: [listingLd(p, url, agent), breadcrumbLd(crumbs)],
+    body,
+  };
+}
+
+/** Todas las combinaciones operación × tipo × zona que tienen al menos una propiedad activa */
+function zoneFacets(active: Property[]): CatalogFacet[] {
+  const set = new Map<string, CatalogFacet>();
+  const ops: Array<OperationType | undefined> = [undefined, 'sale', 'rent'];
+  for (const p of active) {
+    const z = zoneOf(p);
+    const levels: Array<Pick<CatalogFacet, 'state' | 'city' | 'neighborhood'>> = [{}];
+    if (z.state) levels.push({ state: z.state });
+    if (z.state && z.city) levels.push({ state: z.state, city: z.city });
+    if (z.state && z.city && z.neighborhood) levels.push({ state: z.state, city: z.city, neighborhood: z.neighborhood });
+    for (const op of ops) {
+      if (op && p.operation_type !== op) continue;
+      for (const type of [undefined, p.property_type]) {
+        for (const lv of levels) {
+          const f: CatalogFacet = { operation: op, type, ...lv };
+          const key = catalogPath(f);
+          if (key !== '/propiedades') set.set(key, f);
+        }
+      }
+    }
+  }
+  return [...set.values()];
+}
+
+function namesFor(items: Property[]): FacetNames {
+  const p = items[0];
+  return p ? { state: p.state ?? undefined, city: p.city ?? undefined, neighborhood: p.neighborhood ?? undefined } : {};
+}
+
+function zonePage(f: CatalogFacet, active: Property[]): PageMeta {
+  const items = active.filter((p) => matches(p, f));
+  const names = namesFor(items);
+  const heading = facetHeading(f, names);
+  const crumbs = facetCrumbs(f, names) as Crumb[];
+  const path = catalogPath(f);
+
+  // Resumen único por página (evita contenido delgado/duplicado)
+  const mxn = items.filter((p) => p.currency === 'MXN').map((p) => p.price).filter((n) => n > 0);
+  const lo = mxn.length ? Math.min(...mxn) : 0;
+  const hi = mxn.length ? Math.max(...mxn) : 0;
+  const range = !mxn.length ? '' : lo === hi ? `con precio de ${formatPrice(lo)}` : `con precios desde ${formatPrice(lo)} hasta ${formatPrice(hi)}`;
+  const types = [...new Set(items.map((p) => TYPE_PLURAL[p.property_type].toLowerCase()))];
+  const intro = `Hay ${items.length} ${items.length === 1 ? 'opción disponible' : 'opciones disponibles'}${range ? ` ${range}` : ''}${
+    !f.type && types.length > 1 ? `, entre ${types.slice(0, -1).join(', ')} y ${types.slice(-1)}` : ''
+  }. Cada propiedad incluye fotos, características, ubicación y contacto directo con un asesor de ${COMPANY.name}.`;
+
+  // Sub-zonas y operaciones relacionadas
+  const childKey = f.neighborhood ? null : f.city ? 'neighborhood' : f.state ? 'city' : 'state';
+  const children = new Map<string, { label: string; n: number }>();
+  if (childKey) {
+    for (const p of items) {
+      const z = zoneOf(p);
+      const slug = z[childKey];
+      if (!slug) continue;
+      const label = (childKey === 'state' ? p.state : childKey === 'city' ? p.city : p.neighborhood) ?? slug;
+      const to = catalogPath({ ...f, [childKey]: slug });
+      const cur = children.get(to) ?? { label, n: 0 };
+      cur.n++;
+      children.set(to, cur);
+    }
+  }
+  const related = (['sale', 'rent', undefined] as Array<OperationType | undefined>)
+    .filter((op) => op !== f.operation)
+    .map((op) => ({ f: { ...f, operation: op }, label: facetHeading({ ...f, operation: op }, names) }))
+    .filter((r) => active.some((p) => matches(p, r.f)));
+
+  const body = `${header()}
+<main class="pr">
+  ${crumbsHtml(crumbs)}
+  <h1>${esc(heading)}</h1>
+  <p>${esc(intro)}</p>
+  ${
+    children.size
+      ? `<h2>${childKey === 'state' ? 'Por estado' : childKey === 'city' ? 'Por municipio' : 'Por colonia'}</h2><ul>${[...children.entries()]
+          .sort((a, b) => b[1].n - a[1].n)
+          .map(([to, c]) => `<li><a href="${esc(to)}">${esc(c.label)}</a> (${c.n})</li>`)
+          .join('')}</ul>`
+      : ''
+  }
+  <ul class="pr-grid">${items.map(card).join('')}</ul>
+  ${related.length ? `<p>${related.map((r) => `<a href="${esc(catalogPath(r.f))}">${esc(r.label)}</a>`).join(' · ')}</p>` : ''}
+</main>
+${footer()}`;
+
+  return {
+    path,
+    title: `${heading} | ${COMPANY.name}`,
+    description: summarize(`${heading}: ${intro}`),
+    image: items.find((p) => p.cover_image_url)?.cover_image_url,
+    jsonLd: [breadcrumbLd(crumbs), itemListLd(items.slice(0, 100), (p) => `/propiedades/${p.slug}`)],
     body,
   };
 }
@@ -345,11 +460,8 @@ function sitemap(site: string, properties: Property[]): string {
   const urls: Array<{ loc: string; lastmod?: string; priority: string; changefreq: string; image?: { loc: string; title: string } }> = [
     { loc: '/', priority: '1.0', changefreq: 'weekly' },
     { loc: '/propiedades', priority: '0.9', changefreq: 'daily' },
-    { loc: '/propiedades?operation=sale', priority: '0.8', changefreq: 'daily' },
-    { loc: '/propiedades?operation=rent', priority: '0.8', changefreq: 'daily' },
     { loc: '/aviso-de-privacidad', priority: '0.2', changefreq: 'yearly' },
   ];
-  const facets = new Set<string>();
   for (const p of properties) {
     urls.push({
       loc: `/propiedades/${encodeURIComponent(p.slug)}`,
@@ -358,13 +470,11 @@ function sitemap(site: string, properties: Property[]): string {
       changefreq: 'weekly',
       image: p.cover_image_url ? { loc: p.cover_image_url, title: p.title } : undefined,
     });
-    if (p.status === 'active' && p.state) {
-      facets.add(new URLSearchParams({ state: p.state }).toString());
-      if (p.city) facets.add(new URLSearchParams({ state: p.state, city: p.city }).toString());
-      if (p.city && p.neighborhood) facets.add(new URLSearchParams({ state: p.state, city: p.city, neighborhood: p.neighborhood }).toString());
-    }
   }
-  facets.forEach((f) => urls.push({ loc: `/propiedades?${f}`, priority: '0.6', changefreq: 'daily' }));
+  for (const f of zoneFacets(properties.filter((p) => p.status === 'active'))) {
+    const depth = [f.type, f.state, f.city, f.neighborhood].filter(Boolean).length;
+    urls.push({ loc: catalogPath(f), priority: depth <= 1 ? '0.8' : depth === 2 ? '0.7' : '0.6', changefreq: 'daily' });
+  }
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
@@ -408,6 +518,8 @@ export async function run(ctx: Ctx) {
 
   const featured = [...active].sort((a, b) => Number(b.featured) - Number(a.featured)).slice(0, 6);
   const pages: PageMeta[] = [homePage(featured), catalogPage(properties), privacyPage()];
+  const facets = zoneFacets(active);
+  facets.forEach((f) => pages.push(zonePage(f, active)));
 
   for (const p of properties) {
     const similar = active
@@ -432,5 +544,7 @@ export async function run(ctx: Ctx) {
     }
   }
 
-  console.log(`[prerender] ${pages.length} páginas (${properties.length} propiedades) + sitemap.xml · dominio ${ctx.site}`);
+  console.log(
+    `[prerender] ${pages.length} páginas (${properties.length} propiedades, ${facets.length} páginas por zona) + sitemap.xml · dominio ${ctx.site}`,
+  );
 }

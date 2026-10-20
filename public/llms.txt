@@ -20,8 +20,9 @@
 
 - [Inicio](https://espacioquerido.mx/): servicios, equipo de asesores, financiamientos, formulario de contacto y preguntas frecuentes.
 - [Catálogo de propiedades](https://espacioquerido.mx/propiedades): buscador por operación (venta/renta), tipo, estado, municipio, colonia, precio, recámaras, baños, estacionamientos, metros de construcción y de terreno, y amenidades.
-- [Propiedades en venta](https://espacioquerido.mx/propiedades?operation=sale)
-- [Propiedades en renta](https://espacioquerido.mx/propiedades?operation=rent)
+- [Propiedades en venta](https://espacioquerido.mx/venta)
+- [Propiedades en renta](https://espacioquerido.mx/renta)
+- Páginas por zona: `https://espacioquerido.mx/{venta|renta|inmuebles}/{tipo}/{estado}/{municipio}/{colonia}`, por ejemplo [casas en venta en Monterrey](https://espacioquerido.mx/venta/casas/nuevo-leon/monterrey). Tipos: casas, departamentos, terrenos, oficinas, locales, bodegas.
 - [Aviso de privacidad](https://espacioquerido.mx/aviso-de-privacidad)
 
 Cada propiedad tiene una página con ID, ubicación, precio, características, amenidades, mapa, galería y el asesor asignado: `https://espacioquerido.mx/propiedades/{slug}`. Todas incluyen datos estructurados schema.org (RealEstateListing). El listado completo y actualizado está en el sitemap.

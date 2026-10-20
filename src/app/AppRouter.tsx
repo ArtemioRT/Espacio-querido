@@ -39,6 +39,10 @@ export default function AppRouter() {
         <Route element={<PublicLayout />}>
           <Route path={PATHS.home} element={<HomePage />} />
           <Route path={PATHS.properties} element={<PropertiesPage />} />
+          {/* Catálogo por zona: /venta/casas/nuevo-leon/monterrey/cumbres-elite (ver utils/catalog.ts) */}
+          <Route path="venta/*" element={<PropertiesPage />} />
+          <Route path="renta/*" element={<PropertiesPage />} />
+          <Route path="inmuebles/*" element={<PropertiesPage />} />
           <Route path={PATHS.propertyDetail} element={<PropertyDetailPage />} />
           <Route path={PATHS.privacy} element={<PrivacyPage />} />
           <Route path="*" element={<NotFoundPage />} />

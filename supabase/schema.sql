@@ -175,6 +175,12 @@ alter table public.properties add column if not exists code bigint generated alw
 create unique index if not exists idx_properties_code  on public.properties (code);
 create index if not exists idx_properties_agent        on public.properties (agent_id);
 
+-- Slugs de ubicación para las URLs por zona (/venta/casas/nuevo-leon/monterrey/cumbres)
+alter table public.properties add column if not exists state_slug        text;
+alter table public.properties add column if not exists city_slug         text;
+alter table public.properties add column if not exists neighborhood_slug text;
+create index if not exists idx_properties_slugs on public.properties (state_slug, city_slug, neighborhood_slug);
+
 -- Puede editar la propiedad: admin, o el asesor asignado
 create or replace function public.can_edit_property(p_id uuid)
 returns boolean language sql stable security definer set search_path = public as $$
@@ -221,6 +227,9 @@ begin
   if new.slug is null or new.slug = '' then
     new.slug := public.slugify(new.title) || '-' || substr(replace(new.id::text, '-', ''), 1, 6);
   end if;
+  new.state_slug        := nullif(public.slugify(new.state), '');
+  new.city_slug         := nullif(public.slugify(new.city), '');
+  new.neighborhood_slug := nullif(public.slugify(new.neighborhood), '');
   if new.status = 'active' and new.published_at is null then
     new.published_at := now();
   end if;
@@ -530,14 +539,23 @@ returns table (label text, kind text) language sql stable as $$
 $$;
 grant execute on function public.get_property_locations() to anon, authenticated;
 
--- Estado → municipio → colonia con número de propiedades activas (filtros del buscador)
+-- Rellena los slugs de ubicación de propiedades existentes (el trigger los mantiene después)
+update public.properties
+   set state = state
+ where (state is not null and state_slug is null)
+    or (city is not null and city_slug is null)
+    or (neighborhood is not null and neighborhood_slug is null);
+
+-- Estado → municipio → colonia con slugs y número de propiedades activas (buscador y URLs por zona)
+drop function if exists public.get_location_tree();
 create or replace function public.get_location_tree()
-returns table (state text, city text, neighborhood text, total bigint) language sql stable as $$
-  select trim(state), trim(city), nullif(trim(neighborhood), ''), count(*)
+returns table (state text, state_slug text, city text, city_slug text, neighborhood text, neighborhood_slug text, total bigint)
+language sql stable as $$
+  select min(trim(state)), state_slug, min(trim(city)), city_slug, min(nullif(trim(neighborhood), '')), neighborhood_slug, count(*)
   from public.properties
-  where status = 'active' and coalesce(trim(state), '') <> '' and coalesce(trim(city), '') <> ''
-  group by 1, 2, 3
-  order by 1, 2, 3;
+  where status = 'active' and state_slug is not null and city_slug is not null
+  group by state_slug, city_slug, neighborhood_slug
+  order by 1, 3, 5;
 $$;
 grant execute on function public.get_location_tree() to anon, authenticated;
 

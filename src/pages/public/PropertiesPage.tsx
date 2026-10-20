@@ -1,54 +1,33 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { SearchX, SlidersHorizontal, X } from 'lucide-react';
 import PropertyCard, { PropertyCardSkeleton } from '@/components/properties/PropertyCard';
 import PropertyFilters from '@/components/properties/PropertyFilters';
 import Pagination from '@/components/ui/Pagination';
 import {
-  getLocationSuggestions, getLocationTree, searchProperties, type LocationTree, type PropertySearchFilters, type SortOption,
+  facetNames, getLocationSuggestions, getLocationTree, searchProperties, type LocationTree, type PropertySearchFilters, type SortOption,
 } from '@/services/properties.service';
 import { trackEvent } from '@/services/analytics.service';
 import { getPublicAgent } from '@/services/agents.service';
 import Avatar from '@/components/ui/Avatar';
 import { useSeo } from '@/hooks/useSeo';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
-import { breadcrumbLd, itemListLd, type Crumb } from '@/utils/seo';
-import { PATHS, propertyUrl } from '@/app/paths';
+import { breadcrumbLd, itemListLd } from '@/utils/seo';
+import { propertyUrl } from '@/app/paths';
 import { useLockBody } from '@/hooks/useLockBody';
 import { OPERATION_LABELS, PAGE_SIZE, PROPERTY_TYPE_LABELS } from '@/utils/constants';
+import { catalogPath, facetCrumbs, facetHeading, parseCatalogPath, slugify, type CatalogFacet } from '@/utils/catalog';
 import { cx, formatNumber } from '@/utils/format';
 import type { OperationType, Property, PropertyType, PublicAgent } from '@/types';
 import styles from './PropertiesPage.module.scss';
 
-const TYPE_PLURAL: Record<PropertyType, string> = {
-  casa: 'Casas',
-  departamento: 'Departamentos',
-  terreno: 'Terrenos',
-  oficina: 'Oficinas',
-  local: 'Locales comerciales',
-  bodega: 'Bodegas y naves',
-  otro: 'Propiedades',
-};
-
-/** "Casas en venta en Cumbres, Monterrey" a partir de los filtros indexables */
-function headingFor(f: PropertySearchFilters): string {
-  const what = f.type ? TYPE_PLURAL[f.type] : 'Propiedades';
-  const op = f.operation === 'sale' ? ' en venta' : f.operation === 'rent' ? ' en renta' : ' en venta y renta';
-  const where = f.neighborhood ? `${f.neighborhood}, ${f.city}` : f.city ? `${f.city}, ${f.state}` : f.state ? f.state : 'Monterrey y Nuevo León';
-  return `${what}${op} en ${where}`;
-}
-
-const INDEXABLE = ['operation', 'type', 'state', 'city', 'neighborhood', 'page'];
-
 const num = (v: string | null) => (v && Number(v) > 0 ? Number(v) : undefined);
 
-function parseFilters(sp: URLSearchParams): PropertySearchFilters {
-  const op = sp.get('operation');
-  const type = sp.get('type');
+/** Filtros de zona salen de la ruta; el resto, de la query (?minPrice=…) */
+function parseFilters(facet: CatalogFacet, sp: URLSearchParams): PropertySearchFilters {
   return {
+    ...facet,
     q: sp.get('q') || undefined,
-    operation: op === 'sale' || op === 'rent' ? (op as OperationType) : undefined,
-    type: type && type in PROPERTY_TYPE_LABELS ? (type as PropertyType) : undefined,
     minPrice: num(sp.get('minPrice')),
     maxPrice: num(sp.get('maxPrice')),
     bedrooms: num(sp.get('bedrooms')),
@@ -58,9 +37,6 @@ function parseFilters(sp: URLSearchParams): PropertySearchFilters {
     maxM2: num(sp.get('maxM2')),
     minLand: num(sp.get('minLand')),
     maxLand: num(sp.get('maxLand')),
-    state: sp.get('state') || undefined,
-    city: sp.get('city') || undefined,
-    neighborhood: sp.get('neighborhood') || undefined,
     amenities: sp.get('amenities')?.split(',').filter(Boolean) ?? [],
     agent: sp.get('agent') || undefined,
     sort: (sp.get('sort') as SortOption) || 'recent',
@@ -68,20 +44,47 @@ function parseFilters(sp: URLSearchParams): PropertySearchFilters {
   };
 }
 
-function toParams(f: PropertySearchFilters): URLSearchParams {
+const FACET_KEYS = ['operation', 'type', 'state', 'city', 'neighborhood'] as const;
+
+/** URL completa (ruta por zona + query de los demás filtros) */
+export function filtersToUrl(f: PropertySearchFilters): string {
   const p = new URLSearchParams();
   Object.entries(f).forEach(([k, v]) => {
+    if ((FACET_KEYS as readonly string[]).includes(k)) return;
     if (v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length)) return;
     if (k === 'sort' && v === 'recent') return;
     if (k === 'page' && v === 1) return;
     p.set(k, Array.isArray(v) ? v.join(',') : String(v));
   });
-  return p;
+  const path = catalogPath({ operation: f.operation || undefined, type: f.type || undefined, state: f.state, city: f.city, neighborhood: f.neighborhood });
+  return `${path}${p.toString() ? `?${p}` : ''}`;
+}
+
+/** Enlaces antiguos /propiedades?operation=sale&state=Nuevo%20León → ruta por zona */
+function legacyRedirect(pathname: string, sp: URLSearchParams): string | null {
+  if (pathname !== '/propiedades') return null;
+  if (!FACET_KEYS.some((k) => sp.get(k))) return null;
+  const op = sp.get('operation');
+  const type = sp.get('type');
+  const facet: CatalogFacet = {
+    operation: op === 'sale' || op === 'rent' ? (op as OperationType) : undefined,
+    type: type && type in PROPERTY_TYPE_LABELS ? (type as PropertyType) : undefined,
+    state: sp.get('state') ? slugify(sp.get('state')) : undefined,
+    city: sp.get('city') ? slugify(sp.get('city')) : undefined,
+    neighborhood: sp.get('neighborhood') ? slugify(sp.get('neighborhood')) : undefined,
+  };
+  const rest = new URLSearchParams(sp);
+  FACET_KEYS.forEach((k) => rest.delete(k));
+  return `${catalogPath(facet)}${rest.toString() ? `?${rest}` : ''}`;
 }
 
 export default function PropertiesPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const filters = useMemo(() => parseFilters(searchParams), [searchParams]);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const facet = useMemo<CatalogFacet>(() => parseCatalogPath(location.pathname) ?? {}, [location.pathname]);
+  const filters = useMemo(() => parseFilters(facet, searchParams), [facet, searchParams]);
+  const redirect = legacyRedirect(location.pathname, searchParams);
 
   const [items, setItems] = useState<Property[]>([]);
   const [count, setCount] = useState(0);
@@ -102,30 +105,18 @@ export default function PropertiesPage() {
   }, [filters.agent]);
 
   // ---------- SEO ----------
-  const heading = agent ? `Propiedades de ${agent.full_name}` : headingFor(filters);
-  const canonicalParams = new URLSearchParams();
-  INDEXABLE.forEach((k) => {
-    const v = searchParams.get(k);
-    if (v) canonicalParams.set(k, v);
-  });
-  // Combinaciones con precio, medidas, texto libre, etc. no se indexan (evita páginas duplicadas)
-  const hasNonIndexable = [...searchParams.keys()].some((k) => !INDEXABLE.includes(k) && k !== 'sort');
-
-  const crumbs: Crumb[] = [{ label: 'Inicio', to: PATHS.home }, { label: 'Propiedades', to: PATHS.properties }];
-  if (filters.state) crumbs.push({ label: filters.state, to: `${PATHS.properties}?state=${encodeURIComponent(filters.state)}` });
-  if (filters.state && filters.city)
-    crumbs.push({ label: filters.city, to: `${PATHS.properties}?state=${encodeURIComponent(filters.state)}&city=${encodeURIComponent(filters.city)}` });
-  if (filters.state && filters.city && filters.neighborhood)
-    crumbs.push({
-      label: filters.neighborhood,
-      to: `${PATHS.properties}?state=${encodeURIComponent(filters.state)}&city=${encodeURIComponent(filters.city)}&neighborhood=${encodeURIComponent(filters.neighborhood)}`,
-    });
+  const names = facetNames(tree, facet);
+  const heading = agent ? `Propiedades de ${agent.full_name}` : facetHeading(facet, names);
+  const crumbs = facetCrumbs(facet, names);
+  // La ruta por zona es indexable; combinaciones con precio, medidas, texto libre, etc. no
+  const hasNonIndexable = [...searchParams.keys()].some((k) => k !== 'page' && k !== 'sort');
+  const page = filters.page ?? 1;
 
   useSeo({
-    title: (filters.page ?? 1) > 1 ? `${heading} – página ${filters.page}` : heading,
+    title: page > 1 ? `${heading} – página ${page}` : heading,
     description: `${heading}. ${count ? `${count} opciones disponibles` : 'Catálogo actualizado'} con fotos, precios y asesoría de Espacio Querido.`,
-    canonical: `${PATHS.properties}${canonicalParams.toString() ? `?${canonicalParams}` : ''}`,
-    noindex: hasNonIndexable || !!filters.agent,
+    canonical: `${catalogPath(facet)}${page > 1 ? `?page=${page}` : ''}`,
+    noindex: hasNonIndexable || (!loading && count === 0),
     jsonLd: [breadcrumbLd(crumbs), ...(items.length ? [itemListLd(items, (p) => propertyUrl(p.slug))] : [])],
   });
   useLockBody(drawer);
@@ -135,6 +126,7 @@ export default function PropertiesPage() {
   }, []);
 
   useEffect(() => {
+    if (redirect) return;
     let cancelled = false;
     setLoading(true);
     setError('');
@@ -149,7 +141,7 @@ export default function PropertiesPage() {
     return () => {
       cancelled = true;
     };
-  }, [filters]);
+  }, [filters, redirect]);
 
   // Registro de búsquedas para el panel (solo cuando cambian los criterios, no la página)
   const searchKey = useMemo(() => {
@@ -168,19 +160,30 @@ export default function PropertiesPage() {
 
   const update = useCallback(
     (patch: Partial<PropertySearchFilters>) => {
-      const next = { ...parseFilters(searchParams), ...patch };
+      const next = { ...filters, ...patch };
       if (!('page' in patch)) next.page = 1;
-      setSearchParams(toParams(next), { replace: true });
+      navigate(filtersToUrl(next), { replace: true });
     },
-    [searchParams, setSearchParams],
+    [filters, navigate],
   );
 
-  const clear = () => setSearchParams(new URLSearchParams(), { replace: true });
+  const clear = () => navigate('/propiedades', { replace: true });
 
-  const goToPage = (page: number) => {
-    update({ page });
+  const goToPage = (p: number) => {
+    update({ page: p });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Sub-zonas con propiedades (enlaces internos, buenos para SEO)
+  const subzones = useMemo(() => {
+    const st = facet.state ? tree[facet.state] : undefined;
+    if (!facet.state) return Object.entries(tree).map(([slug, n]) => ({ slug, name: n.name, total: n.total, to: catalogPath({ ...facet, state: slug }) }));
+    if (st && !facet.city)
+      return Object.entries(st.cities).map(([slug, n]) => ({ slug, name: n.name, total: n.total, to: catalogPath({ ...facet, city: slug }) }));
+    const ct = st && facet.city ? st.cities[facet.city] : undefined;
+    if (ct && !facet.neighborhood) return ct.neighborhoods.map((n) => ({ ...n, to: catalogPath({ ...facet, neighborhood: n.slug }) }));
+    return [];
+  }, [tree, facet]);
 
   // Chips de filtros activos
   const activeChips: Array<{ key: string; label: string; remove: () => void }> = [];
@@ -193,9 +196,9 @@ export default function PropertiesPage() {
   if (filters.bedrooms) activeChips.push({ key: 'bed', label: `${filters.bedrooms}+ recámaras`, remove: () => update({ bedrooms: undefined }) });
   if (filters.bathrooms) activeChips.push({ key: 'bath', label: `${filters.bathrooms}+ baños`, remove: () => update({ bathrooms: undefined }) });
   if (filters.parking) activeChips.push({ key: 'park', label: `${filters.parking}+ estac.`, remove: () => update({ parking: undefined }) });
-  if (filters.state) activeChips.push({ key: 'state', label: filters.state, remove: () => update({ state: undefined, city: undefined, neighborhood: undefined }) });
-  if (filters.city) activeChips.push({ key: 'city', label: filters.city, remove: () => update({ city: undefined, neighborhood: undefined }) });
-  if (filters.neighborhood) activeChips.push({ key: 'col', label: filters.neighborhood, remove: () => update({ neighborhood: undefined }) });
+  if (filters.state) activeChips.push({ key: 'state', label: names.state ?? filters.state, remove: () => update({ state: undefined, city: undefined, neighborhood: undefined }) });
+  if (filters.city) activeChips.push({ key: 'city', label: names.city ?? filters.city, remove: () => update({ city: undefined, neighborhood: undefined }) });
+  if (filters.neighborhood) activeChips.push({ key: 'col', label: names.neighborhood ?? filters.neighborhood, remove: () => update({ neighborhood: undefined }) });
   const rangeLabel = (min?: number, max?: number, unit = 'm²') =>
     min && max ? `${formatNumber(min)}–${formatNumber(max)} ${unit}` : min ? `Desde ${formatNumber(min)} ${unit}` : `Hasta ${formatNumber(max)} ${unit}`;
   if (filters.minM2 || filters.maxM2)
@@ -205,6 +208,8 @@ export default function PropertiesPage() {
   filters.amenities?.forEach((a) =>
     activeChips.push({ key: `a-${a}`, label: a, remove: () => update({ amenities: filters.amenities!.filter((x) => x !== a) }) }),
   );
+
+  if (redirect) return <Navigate to={redirect} replace />;
 
   return (
     <div className={styles.page}>
@@ -296,6 +301,21 @@ export default function PropertiesPage() {
           )}
 
           <Pagination page={filters.page ?? 1} total={count} pageSize={PAGE_SIZE} onChange={goToPage} />
+
+          {subzones.length > 0 && (
+            <nav className={styles.zones} aria-label="Buscar por zona">
+              <h2>{facet.city ? 'Colonias' : facet.state ? 'Municipios' : 'Estados'} con propiedades</h2>
+              <ul>
+                {subzones.map((z) => (
+                  <li key={z.slug}>
+                    <Link to={z.to}>
+                      {z.name} <span>({z.total})</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
         </section>
       </div>
     </div>

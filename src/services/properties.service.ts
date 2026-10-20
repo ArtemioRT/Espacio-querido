@@ -17,6 +17,7 @@ export interface PropertySearchFilters {
   maxM2?: number;
   minLand?: number;
   maxLand?: number;
+  /** slugs de ubicación (ver utils/catalog.ts) */
   state?: string;
   city?: string;
   neighborhood?: string;
@@ -28,7 +29,7 @@ export interface PropertySearchFilters {
 }
 
 const LIST_FIELDS =
-  'id,code,agent_id,slug,title,status,operation_type,property_type,price,currency,bedrooms,bathrooms,half_bathrooms,parking_spaces,construction_m2,land_m2,state,city,neighborhood,cover_image_url,featured,amenities,source,views_count,created_at,updated_at';
+  'id,code,agent_id,slug,state_slug,city_slug,neighborhood_slug,title,status,operation_type,property_type,price,currency,bedrooms,bathrooms,half_bathrooms,parking_spaces,construction_m2,land_m2,state,city,neighborhood,cover_image_url,featured,amenities,source,views_count,created_at,updated_at';
 
 const ADMIN_LIST_FIELDS = `${LIST_FIELDS},agent:profiles(id,full_name,avatar_url)`;
 
@@ -61,9 +62,9 @@ export async function searchProperties(f: PropertySearchFilters): Promise<{ data
   if (f.maxM2) query = query.lte('construction_m2', f.maxM2);
   if (f.minLand) query = query.gte('land_m2', f.minLand);
   if (f.maxLand) query = query.lte('land_m2', f.maxLand);
-  if (f.state) query = query.eq('state', f.state);
-  if (f.city) query = query.eq('city', f.city);
-  if (f.neighborhood) query = query.eq('neighborhood', f.neighborhood);
+  if (f.state) query = query.eq('state_slug', f.state);
+  if (f.city) query = query.eq('city_slug', f.city);
+  if (f.neighborhood) query = query.eq('neighborhood_slug', f.neighborhood);
   if (f.amenities?.length) query = query.contains('amenities', f.amenities);
   if (f.agent && /^[0-9a-f-]{36}$/i.test(f.agent)) query = query.eq('agent_id', f.agent);
 
@@ -133,9 +134,15 @@ export async function getSimilarProperties(p: Property, limit = 3): Promise<Prop
   return (any ?? []) as unknown as Property[];
 }
 
+export interface LocationNode {
+  name: string;
+  total: number;
+}
+/** estado → municipio → colonias, indexado por slug (con nombre real y conteo) */
 export interface LocationTree {
-  /** estado → municipio → colonias (con conteo de propiedades) */
-  [state: string]: { total: number; cities: { [city: string]: { total: number; neighborhoods: Array<{ name: string; total: number }> } } };
+  [stateSlug: string]: LocationNode & {
+    cities: { [citySlug: string]: LocationNode & { neighborhoods: Array<LocationNode & { slug: string }> } };
+  };
 }
 
 let treeCache: Promise<LocationTree> | null = null;
@@ -148,18 +155,27 @@ export function getLocationTree(): Promise<LocationTree> {
         treeCache = null;
         return tree;
       }
-      for (const row of (data ?? []) as Array<{ state: string; city: string; neighborhood: string | null; total: number }>) {
-        const n = Number(row.total);
-        const st = (tree[row.state] ??= { total: 0, cities: {} });
+      type Row = { state: string; state_slug: string; city: string; city_slug: string; neighborhood: string | null; neighborhood_slug: string | null; total: number };
+      for (const r of (data ?? []) as Row[]) {
+        const n = Number(r.total);
+        const st = (tree[r.state_slug] ??= { name: r.state, total: 0, cities: {} });
         st.total += n;
-        const ct = (st.cities[row.city] ??= { total: 0, neighborhoods: [] });
+        const ct = (st.cities[r.city_slug] ??= { name: r.city, total: 0, neighborhoods: [] });
         ct.total += n;
-        if (row.neighborhood) ct.neighborhoods.push({ name: row.neighborhood, total: n });
+        if (r.neighborhood && r.neighborhood_slug) ct.neighborhoods.push({ slug: r.neighborhood_slug, name: r.neighborhood, total: n });
       }
       return tree;
     });
   }
   return treeCache;
+}
+
+/** Nombres reales de una faceta a partir del árbol de ubicaciones */
+export function facetNames(tree: LocationTree, f: { state?: string; city?: string; neighborhood?: string }) {
+  const st = f.state ? tree[f.state] : undefined;
+  const ct = st && f.city ? st.cities[f.city] : undefined;
+  const nb = ct && f.neighborhood ? ct.neighborhoods.find((n) => n.slug === f.neighborhood) : undefined;
+  return { state: st?.name, city: ct?.name, neighborhood: nb?.name };
 }
 
 export async function getLocationSuggestions(): Promise<Array<{ label: string; kind: string }>> {

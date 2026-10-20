@@ -15,6 +15,7 @@ import { trackEvent } from '@/services/analytics.service';
 import { summarize, useSeo } from '@/hooks/useSeo';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import { breadcrumbLd, listingLd, type Crumb } from '@/utils/seo';
+import { catalogPath, facetCrumbs, slugify, TYPE_PLURAL } from '@/utils/catalog';
 import { COMPANY, PROPERTY_TYPE_LABELS } from '@/utils/constants';
 import { IMAGES } from '@/utils/content';
 import { formatNumber, formatPrice } from '@/utils/format';
@@ -31,16 +32,23 @@ export default function PropertyDetailPage() {
 
   // ---------- SEO ----------
   const pp = property;
-  const facet = (params: Record<string, string | null | undefined>) => {
-    const sp = new URLSearchParams();
-    Object.entries(params).forEach(([k, v]) => v && sp.set(k, v));
-    return `${PATHS.properties}?${sp}`;
-  };
-  const crumbs: Crumb[] = [{ label: 'Inicio', to: PATHS.home }, { label: 'Propiedades', to: PATHS.properties }];
-  if (pp?.state) crumbs.push({ label: pp.state, to: facet({ state: pp.state }) });
-  if (pp?.state && pp.city) crumbs.push({ label: pp.city, to: facet({ state: pp.state, city: pp.city }) });
-  if (pp?.state && pp.city && pp.neighborhood) crumbs.push({ label: pp.neighborhood, to: facet({ state: pp.state, city: pp.city, neighborhood: pp.neighborhood }) });
-  if (pp) crumbs.push({ label: `ID ${pp.code} · ${pp.title}` });
+  // Inicio › Propiedades › Venta › Casas › Nuevo León › Monterrey › Cumbres › ID …
+  const zone = pp
+    ? {
+        operation: pp.operation_type,
+        type: pp.property_type,
+        state: pp.state_slug || slugify(pp.state) || undefined,
+        city: pp.city_slug || slugify(pp.city) || undefined,
+        neighborhood: pp.neighborhood_slug || slugify(pp.neighborhood) || undefined,
+      }
+    : null;
+  const crumbs: Crumb[] = zone
+    ? [
+        ...facetCrumbs(zone, { state: pp!.state ?? undefined, city: pp!.city ?? undefined, neighborhood: pp!.neighborhood ?? undefined }),
+        { label: `ID ${pp!.code} · ${pp!.title}` },
+      ]
+    : [{ label: 'Inicio', to: PATHS.home }, { label: 'Propiedades', to: PATHS.properties }];
+  const zoneUrl = zone ? catalogPath(zone) : PATHS.properties;
 
   const seoTitle = pp
     ? `${PROPERTY_TYPE_LABELS[pp.property_type]} en ${pp.operation_type === 'sale' ? 'venta' : 'renta'} en ${[pp.neighborhood, pp.city].filter(Boolean).join(', ') || pp.title} · ID ${pp.code}`
@@ -277,6 +285,12 @@ export default function PropertyDetailPage() {
       {similar.length > 0 && (
         <section className={`container ${styles.similar}`}>
           <h2 className="section-title">Propiedades similares</h2>
+          <p className={styles.zoneLink}>
+            <Link to={zoneUrl}>
+              Ver más {TYPE_PLURAL[p.property_type].toLowerCase()} en {p.operation_type === 'sale' ? 'venta' : 'renta'}
+              {p.neighborhood ? ` en ${p.neighborhood}` : p.city ? ` en ${p.city}` : ''} →
+            </Link>
+          </p>
           <div className={styles.similarGrid}>
             {similar.map((s) => (
               <PropertyCard key={s.id} property={s} />

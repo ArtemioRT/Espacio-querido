@@ -77,6 +77,10 @@ export interface Property {
   state: string | null;
   city: string | null;
   neighborhood: string | null;
+  /** generados por la BD a partir de los nombres */
+  state_slug?: string | null;
+  city_slug?: string | null;
+  neighborhood_slug?: string | null;
   address: string | null;
   postal_code: string | null;
   latitude: number | null;
@@ -97,7 +101,7 @@ export interface Property {
 
 export type PropertyInput = Omit<
   Property,
-  'id' | 'code' | 'agent' | 'slug' | 'views_count' | 'published_at' | 'finished_at' | 'created_at' | 'updated_at' | 'images'
+  'id' | 'code' | 'agent' | 'slug' | 'state_slug' | 'city_slug' | 'neighborhood_slug' | 'views_count' | 'published_at' | 'finished_at' | 'created_at' | 'updated_at' | 'images'
 > & { slug?: string };
 
 export interface Lead {

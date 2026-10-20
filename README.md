@@ -98,6 +98,8 @@ Las URLs y nombres están en `scripts/images.manifest.json`. Para revisar que ca
 - genera un HTML estático por página pública (inicio, catálogo, cada propiedad, aviso) con su contenido, metas, Open Graph y datos estructurados schema.org, para buscadores y bots de IA que no ejecutan JavaScript;
 - crea `sitemap.xml` con todas las propiedades y sus fotos, y ajusta `robots.txt` y `llms.txt` al dominio de `VITE_SITE_URL`.
 
+**URLs por zona** (indexables, con su propio HTML): `/venta`, `/renta`, `/inmuebles` (ambas) + tipo opcional (`casas`, `departamentos`, `terrenos`, `oficinas`, `locales`, `bodegas`) + estado / municipio / colonia. Ejemplo: `/venta/casas/nuevo-leon/monterrey/cumbres-elite`. Se generan solo las combinaciones con propiedades activas. Filtros como precio o m² van como `?query` y no se indexan. La lógica vive en `src/utils/catalog.ts`.
+
 Requiere en Render las variables `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` y `VITE_SITE_URL`.
 Las propiedades nuevas obtienen su página pre-renderizada en el siguiente deploy; la acción
 **"Regenerar páginas"** lo hace cada día (configura el secreto `RENDER_DEPLOY_HOOK`, ver `.github/workflows/redeploy.yml`).

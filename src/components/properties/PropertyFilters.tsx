@@ -97,12 +97,18 @@ export default function PropertyFilters({ value, onChange, onClear, locations, t
   const [q, setQ] = useDebouncedText(value.q ?? '', (v) => onChange({ q: v || undefined }), 450);
   const [showAllAmenities, setShowAllAmenities] = useState(false);
 
-  const states = Object.keys(tree).sort((a, b) => a.localeCompare(b, 'es'));
-  const cities = value.state && tree[value.state] ? Object.keys(tree[value.state].cities).sort((a, b) => a.localeCompare(b, 'es')) : [];
-  const neighborhoods =
-    value.state && value.city && tree[value.state]?.cities[value.city]
-      ? [...tree[value.state].cities[value.city].neighborhoods].sort((a, b) => a.name.localeCompare(b.name, 'es'))
-      : [];
+  const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, 'es');
+  const states = Object.entries(tree)
+    .map(([slug, n]) => ({ slug, name: n.name, total: n.total }))
+    .sort(byName);
+  const stateNode = value.state ? tree[value.state] : undefined;
+  const cities = stateNode
+    ? Object.entries(stateNode.cities)
+        .map(([slug, n]) => ({ slug, name: n.name, total: n.total }))
+        .sort(byName)
+    : [];
+  const neighborhoods = stateNode && value.city && stateNode.cities[value.city] ? [...stateNode.cities[value.city].neighborhoods].sort(byName) : [];
+  const unslug = (s: string) => s.replace(/-/g, ' ');
 
   const amenities = value.amenities ?? [];
   const toggleAmenity = (a: string) =>
@@ -143,11 +149,11 @@ export default function PropertyFilters({ value, onChange, onClear, locations, t
           >
             <option value="">Todos los estados</option>
             {states.map((s) => (
-              <option key={s} value={s}>
-                {s} ({tree[s].total})
+              <option key={s.slug} value={s.slug}>
+                {s.name} ({s.total})
               </option>
             ))}
-            {value.state && !tree[value.state] && <option value={value.state}>{value.state}</option>}
+            {value.state && !stateNode && <option value={value.state}>{unslug(value.state)}</option>}
           </select>
         </div>
 
@@ -164,11 +170,11 @@ export default function PropertyFilters({ value, onChange, onClear, locations, t
           >
             <option value="">{value.state ? 'Todos los municipios' : 'Elige un estado primero'}</option>
             {cities.map((c) => (
-              <option key={c} value={c}>
-                {c} ({tree[value.state!].cities[c].total})
+              <option key={c.slug} value={c.slug}>
+                {c.name} ({c.total})
               </option>
             ))}
-            {value.city && !cities.includes(value.city) && <option value={value.city}>{value.city}</option>}
+            {value.city && !cities.some((c) => c.slug === value.city) && <option value={value.city}>{unslug(value.city)}</option>}
           </select>
         </div>
 
@@ -185,12 +191,12 @@ export default function PropertyFilters({ value, onChange, onClear, locations, t
           >
             <option value="">{value.city ? 'Todas las colonias' : 'Elige un municipio primero'}</option>
             {neighborhoods.map((n) => (
-              <option key={n.name} value={n.name}>
+              <option key={n.slug} value={n.slug}>
                 {n.name} ({n.total})
               </option>
             ))}
-            {value.neighborhood && !neighborhoods.some((n) => n.name === value.neighborhood) && (
-              <option value={value.neighborhood}>{value.neighborhood}</option>
+            {value.neighborhood && !neighborhoods.some((n) => n.slug === value.neighborhood) && (
+              <option value={value.neighborhood}>{unslug(value.neighborhood)}</option>
             )}
           </select>
         </div>

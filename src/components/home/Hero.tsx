@@ -2,10 +2,11 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { PATHS, sectionUrl } from '@/app/paths';
+import { catalogPath } from '@/utils/catalog';
 import { IMAGES } from '@/utils/content';
 import { PROPERTY_TYPE_LABELS } from '@/utils/constants';
 import { cx } from '@/utils/format';
-import type { OperationType } from '@/types';
+import type { OperationType, PropertyType } from '@/types';
 import styles from './Hero.module.scss';
 
 export default function Hero() {
@@ -16,10 +17,8 @@ export default function Hero() {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams({ operation });
-    if (q.trim()) params.set('q', q.trim());
-    if (type) params.set('type', type);
-    navigate(`${PATHS.properties}?${params.toString()}`);
+    const path = catalogPath({ operation, type: (type || undefined) as PropertyType | undefined });
+    navigate(q.trim() ? `${path}?q=${encodeURIComponent(q.trim())}` : path);
   };
 
   return (
