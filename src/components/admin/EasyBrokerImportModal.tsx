@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
-import { RefreshCw, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { CheckSquare, RefreshCw, Square, XCircle } from 'lucide-react';
 import { Modal } from './AdminUI';
 import Pagination from '@/components/ui/Pagination';
-import { importEasyBrokerProperties, listEasyBrokerProperties } from '@/services/easybroker.service';
+import { importEasyBrokerProperties, listAllEasyBrokerIds, listEasyBrokerProperties } from '@/services/easybroker.service';
 import { listAssignableAgents } from '@/services/agents.service';
 import { cx } from '@/utils/format';
 import type { AgentRef, EasyBrokerImportResult, EasyBrokerListItem } from '@/types';
@@ -27,6 +27,11 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
   const [results, setResults] = useState<EasyBrokerImportResult[] | null>(null);
   const [agents, setAgents] = useState<AgentRef[]>([]);
   const [agentId, setAgentId] = useState<string>('auto');
+  // Selección masiva (todas las páginas)
+  const [allIds, setAllIds] = useState<Array<{ public_id: string; imported: boolean }> | null>(null);
+  const [loadingAll, setLoadingAll] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const cancelRef = useRef(false);
 
   useEffect(() => {
     if (open && !agents.length) listAssignableAgents().then(setAgents).catch(() => {});
@@ -55,8 +60,31 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
     if (!open) {
       setSelected(new Set());
       setResults(null);
+      setAllIds(null);
+      setProgress(null);
     }
   }, [open]);
+
+  /** Trae los IDs de todas las páginas (una sola vez) y selecciona según el filtro */
+  const selectAll = async (onlyNew: boolean) => {
+    setError('');
+    let ids = allIds;
+    if (!ids) {
+      setLoadingAll(true);
+      try {
+        ids = await listAllEasyBrokerIds();
+        setAllIds(ids);
+      } catch (err) {
+        setError((err as Error).message);
+        return;
+      } finally {
+        setLoadingAll(false);
+      }
+    }
+    setSelected(new Set(ids.filter((i) => !onlyNew || !i.imported).map((i) => i.public_id)));
+  };
+
+  const pendingCount = allIds?.filter((i) => !i.imported).length;
 
   const toggle = (id: string) =>
     setSelected((s) => {
@@ -73,17 +101,35 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
       return n;
     });
 
+  const BATCH = 10;
+
   const runImport = async () => {
+    const ids = [...selected];
     setImporting(true);
     setError('');
+    setResults(null);
+    cancelRef.current = false;
+    setProgress({ done: 0, total: ids.length });
+    const all: EasyBrokerImportResult[] = [];
     try {
-      const { results } = await importEasyBrokerProperties([...selected], status, agentId);
-      setResults(results);
-      setSelected(new Set());
+      for (let i = 0; i < ids.length; i += BATCH) {
+        if (cancelRef.current) break;
+        const chunk = ids.slice(i, i + BATCH);
+        try {
+          const { results } = await importEasyBrokerProperties(chunk, status, agentId);
+          all.push(...results);
+        } catch (err) {
+          // Un lote fallido no detiene el resto
+          all.push(...chunk.map((public_id) => ({ public_id, ok: false, error: (err as Error).message })));
+        }
+        setProgress({ done: Math.min(i + BATCH, ids.length), total: ids.length });
+        setResults([...all]);
+      }
+      const okIds = new Set(all.filter((r) => r.ok).map((r) => r.public_id));
+      setSelected((s) => new Set([...s].filter((id) => !okIds.has(id))));
+      setAllIds((list) => list?.map((x) => (okIds.has(x.public_id) ? { ...x, imported: true } : x)) ?? null);
       onImported();
       load();
-    } catch (err) {
-      setError((err as Error).message);
     } finally {
       setImporting(false);
     }
@@ -116,11 +162,17 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
               ))}
             </select>
           </div>
-          <button className="btn btn--ghost" onClick={onClose}>
-            Cerrar
-          </button>
+          {importing ? (
+            <button className="btn btn--ghost" onClick={() => (cancelRef.current = true)}>
+              Detener
+            </button>
+          ) : (
+            <button className="btn btn--ghost" onClick={onClose}>
+              Cerrar
+            </button>
+          )}
           <button className="btn btn--primary" onClick={runImport} disabled={!selected.size || importing}>
-            {importing ? <span className="spinner spinner--sm spinner--light" /> : `Importar ${selected.size || ''}`}
+            {importing ? <span className="spinner spinner--sm spinner--light" /> : `Importar ${selected.size ? selected.size.toLocaleString('es-MX') : ''}`}
           </button>
         </>
       }
@@ -132,11 +184,25 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
 
       {error && <div className="alert alert--error">{error}</div>}
 
-      {results && (
+      {progress && (
+        <div className={styles.progress}>
+          <div className={styles.progressBar}>
+            <span style={{ width: `${(progress.done / Math.max(progress.total, 1)) * 100}%` }} />
+          </div>
+          <small>
+            {importing
+              ? `Importando ${progress.done.toLocaleString('es-MX')} de ${progress.total.toLocaleString('es-MX')}… puedes dejar esta ventana abierta`
+              : `Proceso terminado: ${progress.done.toLocaleString('es-MX')} de ${progress.total.toLocaleString('es-MX')}`}
+          </small>
+        </div>
+      )}
+
+      {results && !importing && (
         <div className={cx('alert', okCount === results.length ? 'alert--success' : 'alert--info')} style={{ marginBottom: 14 }}>
-          {okCount} de {results.length} propiedades importadas correctamente.
+          {okCount.toLocaleString('es-MX')} de {results.length.toLocaleString('es-MX')} propiedades importadas correctamente.
           {results
             .filter((r) => !r.ok)
+            .slice(0, 20)
             .map((r) => (
               <div key={r.public_id} style={{ marginTop: 4 }}>
                 <XCircle style={{ width: 13, height: 13, verticalAlign: -2 }} /> {r.public_id}: {r.error}
@@ -147,11 +213,23 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
 
       <div className={styles.toolbar}>
         <label className="checkbox">
-          <input type="checkbox" checked={allOnPage} onChange={toggleAll} disabled={!items.length} />
+          <input type="checkbox" checked={allOnPage} onChange={toggleAll} disabled={!items.length || importing} />
           Seleccionar página
         </label>
+        <button className="btn btn--ghost btn--sm" onClick={() => selectAll(false)} disabled={loadingAll || importing || !total}>
+          {loadingAll ? <span className="spinner spinner--sm" /> : <CheckSquare />} Seleccionar todas ({total.toLocaleString('es-MX')})
+        </button>
+        <button className="btn btn--ghost btn--sm" onClick={() => selectAll(true)} disabled={loadingAll || importing || !total}>
+          Solo no importadas{pendingCount !== undefined ? ` (${pendingCount.toLocaleString('es-MX')})` : ''}
+        </button>
+        {selected.size > 0 && (
+          <button className="btn btn--ghost btn--sm" onClick={() => setSelected(new Set())} disabled={importing}>
+            <Square /> Quitar selección
+          </button>
+        )}
         <span className="text-muted" style={{ fontSize: 12 }}>
-          {total} propiedades en EasyBroker
+          {selected.size ? `${selected.size.toLocaleString('es-MX')} seleccionadas · ` : ''}
+          {total.toLocaleString('es-MX')} en EasyBroker
         </span>
         <button className="btn btn--ghost btn--sm" onClick={load} disabled={loading}>
           <RefreshCw /> Actualizar

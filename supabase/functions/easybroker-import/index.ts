@@ -7,6 +7,7 @@
 //
 // Body:
 //   { action: 'list', page?: number }
+//   { action: 'ids' }  → todos los public_id (todas las páginas) y si ya están importados
 //   { action: 'import', ids: string[], status?: 'draft' | 'active', agent_id?: string | 'auto' }
 //     agent_id 'auto' (o vacío): asigna al asesor cuyo correo coincida con el agente de EasyBroker
 // Solo administradores.
@@ -213,6 +214,23 @@ Deno.serve(async (req) => {
           imported: imported.has(p.public_id),
         })),
       });
+    }
+
+    // 2b) Todos los IDs (para "Seleccionar todas"): recorre todas las páginas de EasyBroker
+    if (body.action === 'ids') {
+      const all: string[] = [];
+      for (let page = 1; page <= 200; page++) {
+        const res = await ebFetch(`/properties?page=${page}&limit=50`, apiKey);
+        const content: Any[] = res.content ?? [];
+        all.push(...content.map((p) => p.public_id).filter(Boolean));
+        if (!res.pagination?.next_page || content.length === 0) break;
+      }
+      const imported = new Set<string>();
+      for (let i = 0; i < all.length; i += 200) {
+        const { data } = await admin.from('properties').select('easybroker_id').in('easybroker_id', all.slice(i, i + 200));
+        (data ?? []).forEach((r: Any) => imported.add(r.easybroker_id));
+      }
+      return json({ items: all.map((id) => ({ public_id: id, imported: imported.has(id) })) });
     }
 
     // 3) Importar

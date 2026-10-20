@@ -24,6 +24,10 @@ async function invoke<T>(body: Record<string, unknown>): Promise<T> {
 export const listEasyBrokerProperties = (page = 1) =>
   invoke<EasyBrokerListResponse>({ action: 'list', page });
 
+/** Todos los IDs de la cuenta (todas las páginas), indicando cuáles ya están importados */
+export const listAllEasyBrokerIds = () =>
+  invoke<{ items: Array<{ public_id: string; imported: boolean }> }>({ action: 'ids' }).then((r) => r.items);
+
 /** agentId: id de un asesor, o 'auto' para asignar por el correo del agente en EasyBroker */
 export const importEasyBrokerProperties = (ids: string[], status: 'draft' | 'active', agentId: string | 'auto' = 'auto') =>
   invoke<{ results: EasyBrokerImportResult[] }>({ action: 'import', ids, status, agent_id: agentId });
