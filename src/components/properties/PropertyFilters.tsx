@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { X } from 'lucide-react';
+import { Minus, Plus, X } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { AMENITIES, PROPERTY_TYPE_LABELS } from '@/utils/constants';
 import { cx, formatNumber, onlyDigits } from '@/utils/format';
@@ -13,8 +13,6 @@ interface Props {
   locations: Array<{ label: string; kind: string }>;
   tree: LocationTree;
 }
-
-const COUNT_OPTIONS = [1, 2, 3, 4];
 
 /** Campo de texto con debounce que se resincroniza si el filtro cambia desde fuera */
 function useDebouncedText(external: string, commit: (v: string) => void, delay = 500) {
@@ -75,19 +73,23 @@ function RangeField({
   );
 }
 
-function CountChips({ label, value, onChange }: { label: string; value?: number; onChange: (v?: number) => void }) {
+/** Contador − N + (0 = cualquiera; N = "N o más") */
+function CountStepper({ label, value, onChange, max = 10 }: { label: string; value?: number; onChange: (v?: number) => void; max?: number }) {
+  const n = value ?? 0;
+  const set = (v: number) => onChange(v > 0 ? v : undefined);
   return (
     <div className={styles.group}>
       <span className={styles.label}>{label}</span>
-      <div className={styles.chips}>
-        <button type="button" className={cx(styles.chip, !value && styles.chipActive)} onClick={() => onChange(undefined)}>
-          Todas
+      <div className={styles.stepper}>
+        <button type="button" className={styles.stepBtn} onClick={() => set(n - 1)} disabled={n <= 0} aria-label={`Menos ${label.toLowerCase()}`}>
+          <Minus />
         </button>
-        {COUNT_OPTIONS.map((n) => (
-          <button key={n} type="button" className={cx(styles.chip, value === n && styles.chipActive)} onClick={() => onChange(n)}>
-            {n}+
-          </button>
-        ))}
+        <output className={styles.stepValue} aria-live="polite">
+          {n > 0 ? `${n}+` : 'Cualquiera'}
+        </output>
+        <button type="button" className={styles.stepBtn} onClick={() => set(n + 1)} disabled={n >= max} aria-label={`Más ${label.toLowerCase()}`}>
+          <Plus />
+        </button>
       </div>
     </div>
   );
@@ -240,9 +242,9 @@ export default function PropertyFilters({ value, onChange, onClear, locations, t
       {/* ---------- Precio y medidas ---------- */}
       <RangeField label="Precio" unit="MXN" min={value.minPrice} max={value.maxPrice} onChange={(a, b) => onChange({ minPrice: a, maxPrice: b })} />
 
-      <CountChips label="Recámaras" value={value.bedrooms} onChange={(v) => onChange({ bedrooms: v })} />
-      <CountChips label="Baños" value={value.bathrooms} onChange={(v) => onChange({ bathrooms: v })} />
-      <CountChips label="Estacionamientos" value={value.parking} onChange={(v) => onChange({ parking: v })} />
+      <CountStepper label="Recámaras" value={value.bedrooms} onChange={(v) => onChange({ bedrooms: v })} />
+      <CountStepper label="Baños" value={value.bathrooms} onChange={(v) => onChange({ bathrooms: v })} />
+      <CountStepper label="Estacionamientos" value={value.parking} onChange={(v) => onChange({ parking: v })} />
 
       <RangeField label="Metros de construcción" unit="m²" min={value.minM2} max={value.maxM2} onChange={(a, b) => onChange({ minM2: a, maxM2: b })} />
       <RangeField label="Metros de terreno" unit="m²" min={value.minLand} max={value.maxLand} onChange={(a, b) => onChange({ minLand: a, maxLand: b })} />
