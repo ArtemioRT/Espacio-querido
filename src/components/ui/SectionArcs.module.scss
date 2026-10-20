@@ -1,0 +1,48 @@
+.arcs {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  width: min(60vw, 560px);
+  background-color: currentColor;
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+}
+
+// Mitad inferior del círculo (∪): cuelga desde el borde superior de la sección
+.top {
+  top: 0;
+  aspect-ratio: 1412 / 640;
+  mask-image: url('/images/decor/circles-bottom.webp');
+  -webkit-mask-image: url('/images/decor/circles-bottom.webp');
+}
+
+// Mitad superior del círculo (∩): sube desde el borde inferior de la sección
+.bottom {
+  bottom: 0;
+  aspect-ratio: 1372 / 524;
+  mask-image: url('/images/decor/circles-top.webp');
+  -webkit-mask-image: url('/images/decor/circles-top.webp');
+}
+
+.left {
+  left: -8%;
+}
+
+.right {
+  right: -8%;
+}
+
+.center {
+  left: 50%;
+  translate: -50% 0;
+}
+
+.light {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.dark {
+  color: rgba($color-primary, 0.45);
+}

@@ -31,7 +31,7 @@ export default function Hero() {
           <Link to={sectionUrl('contacto')} className="btn btn--primary" data-track="cta_click" data-track-label="Hero · Agenda cita">
             ¡Agenda tu cita con un experto!
           </Link>
-          <Link to={PATHS.properties} className="btn btn--light" data-track="cta_click" data-track-label="Hero · Catálogo">
+          <Link to={PATHS.properties} className={cx('btn', styles.secondary)} data-track="cta_click" data-track-label="Hero · Catálogo">
             Conoce nuestro catálogo de propiedades
           </Link>
         </div>

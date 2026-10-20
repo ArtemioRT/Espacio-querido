@@ -56,9 +56,9 @@
 .sidebar {
   @include up($bp-lg) {
     position: sticky;
-    top: $header-h + 16px;
+    top: $header-h-lg + 16px;
     align-self: start;
-    max-height: calc(100vh - #{$header-h} - 32px);
+    max-height: calc(100vh - #{$header-h-lg} - 32px);
     overflow-y: auto;
     background: $white;
     border: 1px solid $color-border;

@@ -1,6 +1,8 @@
+import type React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ContactForm from '@/components/forms/ContactForm';
 import type { LeadInterest } from '@/types';
+import SectionArcs from '@/components/ui/SectionArcs';
 import styles from './ContactSection.module.scss';
 
 const VALID: LeadInterest[] = ['venta', 'compra', 'renta', 'inversion', 'otro'];
@@ -12,8 +14,10 @@ export default function ContactSection() {
 
   return (
     <section id="contacto" className={styles.section}>
+      <SectionArcs edge="top" side="left" tone="light" />
+      <SectionArcs edge="bottom" side="right" tone="light" />
       <div className={`container ${styles.grid}`}>
-        <div className={styles.text}>
+        <div className={styles.text} data-reveal>
           <h2>Nuestro equipo te contactará</h2>
           <p>Déjanos tus datos y uno de nuestros expertos se pondrá en contacto contigo a la brevedad.</p>
           <p>
@@ -25,7 +29,9 @@ export default function ContactSection() {
             clientes sobre los nuestros.
           </p>
         </div>
-        <ContactForm defaultInterest={interest} className={styles.form} />
+        <div data-reveal style={{ '--reveal-delay': '150ms' } as React.CSSProperties}>
+          <ContactForm defaultInterest={interest} className={styles.form} />
+        </div>
       </div>
     </section>
   );

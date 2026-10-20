@@ -5,10 +5,12 @@ import CookieBanner from './CookieBanner';
 import WhatsAppButton from './WhatsAppButton';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useScrollToHash } from '@/hooks/useScrollToHash';
+import { useReveal } from '@/hooks/useReveal';
 
 export default function PublicLayout() {
   useAnalytics();
   useScrollToHash();
+  useReveal();
 
   return (
     <>

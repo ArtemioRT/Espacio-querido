@@ -1,33 +1,43 @@
 .grid {
   display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(3, 1fr);
-  max-width: 640px;
+  gap: 18px;
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 1060px;
   margin: 0 auto;
+
+  @include up($bp-sm) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
 
   @include up($bp-md) {
     grid-template-columns: repeat(4, 1fr);
-    gap: 28px 40px;
+    gap: 54px 0;
+    justify-items: center;
   }
 }
 
 .tile {
-  @include flex-center;
-  aspect-ratio: 1.15;
+  width: 100%;
+  max-width: 162px;
+  aspect-ratio: 1;
+  justify-self: center;
+  border-radius: 10px;
+  overflow: hidden;
   background: $color-black;
-  border-radius: $radius;
-  padding: 14px;
-  transition: transform 0.25s $ease, box-shadow 0.25s;
+  @include flex-center;
+  transition: transform 0.3s $ease, box-shadow 0.3s $ease;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: $shadow;
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
   }
 
+  // Las imágenes ya son el mosaico negro con el logo
   img {
-    max-height: 34px;
-    width: auto;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   span {
@@ -35,5 +45,6 @@
     font-weight: 700;
     font-size: 13px;
     text-align: center;
+    padding: 8px;
   }
 }

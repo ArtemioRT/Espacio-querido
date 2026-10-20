@@ -1,6 +1,7 @@
 .section {
   position: relative;
   overflow: hidden;
+  isolation: isolate;
   background: $color-primary;
   color: $white;
   padding: 72px 0;
@@ -9,17 +10,6 @@
     padding: 104px 0;
   }
 
-  &::before {
-    @include rings(rgba(255, 255, 255, 0.12), 560px);
-    left: -260px;
-    top: -200px;
-  }
-
-  &::after {
-    @include rings(rgba(255, 255, 255, 0.1), 460px);
-    right: -220px;
-    bottom: -240px;
-  }
 }
 
 .inner {

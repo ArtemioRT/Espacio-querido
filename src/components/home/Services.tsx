@@ -1,16 +1,21 @@
+import type React from 'react';
 import { Link } from 'react-router-dom';
 import { sectionUrl } from '@/app/paths';
 import { SERVICES } from '@/utils/content';
+import SectionArcs from '@/components/ui/SectionArcs';
 import styles from './Services.module.scss';
 
 export default function Services() {
   return (
-    <section id="servicios" className="section">
+    <section id="servicios" className="section section--arcs">
+      <SectionArcs edge="top" side="right" />
       <div className="container">
-        <h2 className="section-title">Servicios</h2>
+        <h2 className="section-title" data-reveal>
+          Servicios
+        </h2>
         <div className={styles.grid}>
-          {SERVICES.map((s) => (
-            <article key={s.id} className={styles.card}>
+          {SERVICES.map((s, i) => (
+            <article key={s.id} className={styles.card} data-reveal style={{ '--reveal-delay': `${i * 120}ms` } as React.CSSProperties}>
               <div className={styles.media}>
                 <img src={s.image} alt={s.title} loading="lazy" />
               </div>

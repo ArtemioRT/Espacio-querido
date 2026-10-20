@@ -35,7 +35,8 @@ export default function Navbar() {
     <header className={cx(styles.header, scrolled && styles.scrolled)}>
       <div className={cx('container', styles.inner)}>
         <Link to={PATHS.home} className={styles.logo} aria-label="Espacio Querido, inicio">
-          <img src={IMAGES.logo} alt="Espacio Querido" />
+          <img src={IMAGES.logoMark} alt="" className={styles.mark} />
+          <img src={IMAGES.logo} alt="Espacio Querido" className={styles.wordmark} />
         </Link>
 
         <nav className={cx(styles.nav, open && styles.open)} aria-label="Principal">

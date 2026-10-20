@@ -9,17 +9,7 @@
     padding: 104px 0;
   }
 
-  &::before {
-    @include rings(rgba(255, 255, 255, 0.1), 520px);
-    left: -240px;
-    bottom: -260px;
-  }
-
-  &::after {
-    @include rings(rgba(255, 255, 255, 0.1), 420px);
-    right: -180px;
-    top: -200px;
-  }
+  isolation: isolate;
 }
 
 .grid {

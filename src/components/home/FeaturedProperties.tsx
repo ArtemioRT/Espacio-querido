@@ -21,8 +21,10 @@ export default function FeaturedProperties() {
   return (
     <section id="propiedades" className="section section--soft">
       <div className="container">
-        <h2 className="section-title">Propiedades destacadas</h2>
-        <div className={styles.grid}>
+        <h2 className="section-title" data-reveal>
+          Propiedades destacadas
+        </h2>
+        <div className={styles.grid} data-reveal>
           {items
             ? items.map((p) => <PropertyCard key={p.id} property={p} />)
             : Array.from({ length: 3 }).map((_, i) => <PropertyCardSkeleton key={i} />)}

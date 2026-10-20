@@ -1,0 +1,12 @@
+// Albra Regular: archivos propios en /public/fonts (ver public/fonts/README.md)
+@font-face {
+  font-family: 'Albra';
+  src:
+    url('/fonts/Albra-Regular.woff2') format('woff2'),
+    url('/fonts/Albra-Regular.woff') format('woff'),
+    url('/fonts/Albra-Regular.otf') format('opentype'),
+    url('/fonts/Albra-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

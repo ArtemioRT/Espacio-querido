@@ -530,6 +530,21 @@ returns table (label text, kind text) language sql stable as $$
 $$;
 grant execute on function public.get_property_locations() to anon, authenticated;
 
+-- Estado → municipio → colonia con número de propiedades activas (filtros del buscador)
+create or replace function public.get_location_tree()
+returns table (state text, city text, neighborhood text, total bigint) language sql stable as $$
+  select trim(state), trim(city), nullif(trim(neighborhood), ''), count(*)
+  from public.properties
+  where status = 'active' and coalesce(trim(state), '') <> '' and coalesce(trim(city), '') <> ''
+  group by 1, 2, 3
+  order by 1, 2, 3;
+$$;
+grant execute on function public.get_location_tree() to anon, authenticated;
+
+create index if not exists idx_properties_location on public.properties (state, city, neighborhood);
+create index if not exists idx_properties_land     on public.properties (land_m2);
+create index if not exists idx_properties_constr   on public.properties (construction_m2);
+
 -- ---------------------------------------------------------------------
 -- RPC: DASHBOARD (solo staff)
 -- ---------------------------------------------------------------------

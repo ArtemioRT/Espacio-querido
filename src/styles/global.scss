@@ -1,3 +1,5 @@
+@use 'fonts';
+
 *,
 *::before,
 *::after {
@@ -6,14 +8,14 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: $header-h;
+  scroll-padding-top: $header-h-lg;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   font-family: $font-sans;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.6;
   color: $color-text;
   background: $white;
@@ -50,6 +52,7 @@ h3,
 h4 {
   font-family: $font-serif;
   font-weight: 400;
+  letter-spacing: 0.02em;
   line-height: 1.2;
   margin: 0 0 0.5em;
 }
@@ -88,6 +91,50 @@ p {
 
   &--soft {
     background: $color-bg-soft;
+  }
+
+  // Secciones con arcos decorativos (SectionArcs)
+  &--arcs {
+    overflow: hidden;
+    isolation: isolate;
+
+    > :global(.container),
+    > .container {
+      position: relative;
+      z-index: 1;
+    }
+  }
+}
+
+// ---------- Transición de entrada al hacer scroll (useReveal) ----------
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.9s $ease,
+    transform 0.9s $ease;
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+
+  &[data-reveal='fade'] {
+    transform: none;
+  }
+
+  &[data-reveal='zoom'] {
+    transform: scale(0.96);
+  }
+
+  &.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 

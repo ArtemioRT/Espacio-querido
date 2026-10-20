@@ -12,10 +12,42 @@
 
 .label {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: $color-text;
+
+  small {
+    font-weight: 400;
+    text-transform: none;
+    color: $color-muted;
+  }
+}
+
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  legend {
+    margin-bottom: 8px;
+    padding: 0;
+  }
+
+  :global(.select:disabled) {
+    background-color: #f7f7f7;
+    color: $color-muted;
+    cursor: not-allowed;
+  }
+}
+
+.sublabel {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  color: $color-muted !important;
 }
 
 .inputWrap {

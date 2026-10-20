@@ -6,7 +6,8 @@ import type { LeadInterest } from '@/types';
 import teamData from './team.json';
 
 export const IMAGES = {
-  logo: '/images/logo.svg',
+  logo: '/images/logo.svg', // logotipo "ESPACIO QUERIDO"
+  logoMark: '/images/logo-icon.svg', // círculo dorado
   logoWhite: '/images/logo-white.svg',
   logoIcon: '/images/logo-monogram.svg',
   hero: '/images/hero.webp',

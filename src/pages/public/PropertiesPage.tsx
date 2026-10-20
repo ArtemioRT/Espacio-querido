@@ -4,7 +4,9 @@ import { SearchX, SlidersHorizontal, X } from 'lucide-react';
 import PropertyCard, { PropertyCardSkeleton } from '@/components/properties/PropertyCard';
 import PropertyFilters from '@/components/properties/PropertyFilters';
 import Pagination from '@/components/ui/Pagination';
-import { getLocationSuggestions, searchProperties, type PropertySearchFilters, type SortOption } from '@/services/properties.service';
+import {
+  getLocationSuggestions, getLocationTree, searchProperties, type LocationTree, type PropertySearchFilters, type SortOption,
+} from '@/services/properties.service';
 import { trackEvent } from '@/services/analytics.service';
 import { getPublicAgent } from '@/services/agents.service';
 import Avatar from '@/components/ui/Avatar';
@@ -30,6 +32,12 @@ function parseFilters(sp: URLSearchParams): PropertySearchFilters {
     bathrooms: num(sp.get('bathrooms')),
     parking: num(sp.get('parking')),
     minM2: num(sp.get('minM2')),
+    maxM2: num(sp.get('maxM2')),
+    minLand: num(sp.get('minLand')),
+    maxLand: num(sp.get('maxLand')),
+    state: sp.get('state') || undefined,
+    city: sp.get('city') || undefined,
+    neighborhood: sp.get('neighborhood') || undefined,
     amenities: sp.get('amenities')?.split(',').filter(Boolean) ?? [],
     agent: sp.get('agent') || undefined,
     sort: (sp.get('sort') as SortOption) || 'recent',
@@ -59,6 +67,11 @@ export default function PropertiesPage() {
   const [drawer, setDrawer] = useState(false);
   const [locations, setLocations] = useState<Array<{ label: string; kind: string }>>([]);
   const [agent, setAgent] = useState<PublicAgent | null>(null);
+  const [tree, setTree] = useState<LocationTree>({});
+
+  useEffect(() => {
+    getLocationTree().then(setTree);
+  }, []);
 
   useEffect(() => {
     if (filters.agent) getPublicAgent(filters.agent).then(setAgent);
@@ -131,7 +144,15 @@ export default function PropertiesPage() {
   if (filters.bedrooms) activeChips.push({ key: 'bed', label: `${filters.bedrooms}+ recámaras`, remove: () => update({ bedrooms: undefined }) });
   if (filters.bathrooms) activeChips.push({ key: 'bath', label: `${filters.bathrooms}+ baños`, remove: () => update({ bathrooms: undefined }) });
   if (filters.parking) activeChips.push({ key: 'park', label: `${filters.parking}+ estac.`, remove: () => update({ parking: undefined }) });
-  if (filters.minM2) activeChips.push({ key: 'm2', label: `${filters.minM2}+ m²`, remove: () => update({ minM2: undefined }) });
+  if (filters.state) activeChips.push({ key: 'state', label: filters.state, remove: () => update({ state: undefined, city: undefined, neighborhood: undefined }) });
+  if (filters.city) activeChips.push({ key: 'city', label: filters.city, remove: () => update({ city: undefined, neighborhood: undefined }) });
+  if (filters.neighborhood) activeChips.push({ key: 'col', label: filters.neighborhood, remove: () => update({ neighborhood: undefined }) });
+  const rangeLabel = (min?: number, max?: number, unit = 'm²') =>
+    min && max ? `${formatNumber(min)}–${formatNumber(max)} ${unit}` : min ? `Desde ${formatNumber(min)} ${unit}` : `Hasta ${formatNumber(max)} ${unit}`;
+  if (filters.minM2 || filters.maxM2)
+    activeChips.push({ key: 'm2', label: `Construcción ${rangeLabel(filters.minM2, filters.maxM2)}`, remove: () => update({ minM2: undefined, maxM2: undefined }) });
+  if (filters.minLand || filters.maxLand)
+    activeChips.push({ key: 'land', label: `Terreno ${rangeLabel(filters.minLand, filters.maxLand)}`, remove: () => update({ minLand: undefined, maxLand: undefined }) });
   filters.amenities?.forEach((a) =>
     activeChips.push({ key: `a-${a}`, label: a, remove: () => update({ amenities: filters.amenities!.filter((x) => x !== a) }) }),
   );
@@ -166,7 +187,7 @@ export default function PropertiesPage() {
             </button>
           </div>
           <div className={styles.drawerBody}>
-            <PropertyFilters value={filters} onChange={update} onClear={clear} locations={locations} />
+            <PropertyFilters value={filters} onChange={update} onClear={clear} locations={locations} tree={tree} />
           </div>
           <div className={styles.drawerFoot}>
             <button className="btn btn--primary btn--block" onClick={() => setDrawer(false)}>

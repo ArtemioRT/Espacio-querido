@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { AMENITIES, PROPERTY_TYPE_LABELS } from '@/utils/constants';
-import { cx, onlyDigits } from '@/utils/format';
-import type { PropertySearchFilters } from '@/services/properties.service';
+import { cx, formatNumber, onlyDigits } from '@/utils/format';
+import type { LocationTree, PropertySearchFilters } from '@/services/properties.service';
 import styles from './PropertyFilters.module.scss';
 
 interface Props {
@@ -11,9 +11,69 @@ interface Props {
   onChange: (patch: Partial<PropertySearchFilters>) => void;
   onClear: () => void;
   locations: Array<{ label: string; kind: string }>;
+  tree: LocationTree;
 }
 
 const COUNT_OPTIONS = [1, 2, 3, 4];
+
+/** Campo de texto con debounce que se resincroniza si el filtro cambia desde fuera */
+function useDebouncedText(external: string, commit: (v: string) => void, delay = 500) {
+  const [local, setLocal] = useState(external);
+  const debounced = useDebounce(local, delay);
+  const lastCommitted = useRef(external);
+
+  useEffect(() => {
+    if (debounced !== lastCommitted.current) {
+      lastCommitted.current = debounced;
+      commit(debounced);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debounced]);
+
+  useEffect(() => {
+    if (external !== lastCommitted.current) {
+      lastCommitted.current = external;
+      setLocal(external);
+    }
+  }, [external]);
+
+  return [local, setLocal] as const;
+}
+
+function RangeField({
+  label,
+  unit,
+  min,
+  max,
+  onChange,
+  placeholders = ['Mínimo', 'Máximo'],
+}: {
+  label: string;
+  unit?: string;
+  min?: number;
+  max?: number;
+  onChange: (min?: number, max?: number) => void;
+  placeholders?: [string, string];
+}) {
+  const [lo, setLo] = useDebouncedText(min ? String(min) : '', (v) => onChange(Number(v) || undefined, max));
+  const [hi, setHi] = useDebouncedText(max ? String(max) : '', (v) => onChange(min, Number(v) || undefined));
+  const invalid = !!(min && max && min > max);
+
+  return (
+    <div className={styles.group}>
+      <span className={styles.label}>
+        {label}
+        {unit && <small> ({unit})</small>}
+      </span>
+      <div className={styles.range}>
+        <input className={cx('input', invalid && 'is-invalid')} inputMode="numeric" placeholder={placeholders[0]} value={lo ? formatNumber(Number(lo)) : ''} onChange={(e) => setLo(onlyDigits(e.target.value))} aria-label={`${label} mínimo`} />
+        <span>—</span>
+        <input className={cx('input', invalid && 'is-invalid')} inputMode="numeric" placeholder={placeholders[1]} value={hi ? formatNumber(Number(hi)) : ''} onChange={(e) => setHi(onlyDigits(e.target.value))} aria-label={`${label} máximo`} />
+      </div>
+      {invalid && <span className="field__error">El mínimo es mayor que el máximo</span>}
+    </div>
+  );
+}
 
 function CountChips({ label, value, onChange }: { label: string; value?: number; onChange: (v?: number) => void }) {
   return (
@@ -33,62 +93,30 @@ function CountChips({ label, value, onChange }: { label: string; value?: number;
   );
 }
 
-export default function PropertyFilters({ value, onChange, onClear, locations }: Props) {
-  const [q, setQ] = useState(value.q ?? '');
-  const [minPrice, setMinPrice] = useState(value.minPrice ? String(value.minPrice) : '');
-  const [maxPrice, setMaxPrice] = useState(value.maxPrice ? String(value.maxPrice) : '');
-  const [minM2, setMinM2] = useState(value.minM2 ? String(value.minM2) : '');
+export default function PropertyFilters({ value, onChange, onClear, locations, tree }: Props) {
+  const [q, setQ] = useDebouncedText(value.q ?? '', (v) => onChange({ q: v || undefined }), 450);
   const [showAllAmenities, setShowAllAmenities] = useState(false);
 
-  const dq = useDebounce(q, 450);
-  const dMin = useDebounce(minPrice, 600);
-  const dMax = useDebounce(maxPrice, 600);
-  const dM2 = useDebounce(minM2, 600);
-
-  // Sincroniza inputs de texto (con debounce) hacia la URL
-  useEffect(() => {
-    if ((value.q ?? '') !== dq) onChange({ q: dq || undefined });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dq]);
-  useEffect(() => {
-    const n = Number(dMin) || undefined;
-    if (n !== value.minPrice) onChange({ minPrice: n });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dMin]);
-  useEffect(() => {
-    const n = Number(dMax) || undefined;
-    if (n !== value.maxPrice) onChange({ maxPrice: n });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dMax]);
-  useEffect(() => {
-    const n = Number(dM2) || undefined;
-    if (n !== value.minM2) onChange({ minM2: n });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dM2]);
-
-  // Si la URL cambia desde fuera (p. ej. "Limpiar filtros"), resetea los inputs locales
-  useEffect(() => {
-    if ((value.q ?? '') !== dq) setQ(value.q ?? '');
-    if ((value.minPrice ?? undefined) !== (Number(dMin) || undefined)) setMinPrice(value.minPrice ? String(value.minPrice) : '');
-    if ((value.maxPrice ?? undefined) !== (Number(dMax) || undefined)) setMaxPrice(value.maxPrice ? String(value.maxPrice) : '');
-    if ((value.minM2 ?? undefined) !== (Number(dM2) || undefined)) setMinM2(value.minM2 ? String(value.minM2) : '');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value.q, value.minPrice, value.maxPrice, value.minM2]);
+  const states = Object.keys(tree).sort((a, b) => a.localeCompare(b, 'es'));
+  const cities = value.state && tree[value.state] ? Object.keys(tree[value.state].cities).sort((a, b) => a.localeCompare(b, 'es')) : [];
+  const neighborhoods =
+    value.state && value.city && tree[value.state]?.cities[value.city]
+      ? [...tree[value.state].cities[value.city].neighborhoods].sort((a, b) => a.name.localeCompare(b.name, 'es'))
+      : [];
 
   const amenities = value.amenities ?? [];
   const toggleAmenity = (a: string) =>
     onChange({ amenities: amenities.includes(a) ? amenities.filter((x) => x !== a) : [...amenities, a] });
-
   const visibleAmenities = showAllAmenities ? AMENITIES : AMENITIES.slice(0, 8);
 
   return (
     <div className={styles.filters}>
-      <div className={styles.group}>
-        <label className={styles.label} htmlFor="f-q">
-          Ubicación o palabra clave
-        </label>
+      {/* ---------- Ubicación ---------- */}
+      <fieldset className={styles.fieldset}>
+        <legend className={styles.label}>Ubicación</legend>
+
         <div className={styles.inputWrap}>
-          <input id="f-q" className="input" list="f-locations" placeholder="Ej. San Pedro, Cumbres…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <input className="input" list="f-locations" placeholder="Buscar por palabra clave…" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Palabra clave" />
           {q && (
             <button type="button" className={styles.clearInput} onClick={() => setQ('')} aria-label="Limpiar">
               <X />
@@ -102,8 +130,73 @@ export default function PropertyFilters({ value, onChange, onClear, locations }:
             </option>
           ))}
         </datalist>
-      </div>
 
+        <div className="field">
+          <label htmlFor="f-state" className={styles.sublabel}>
+            Estado
+          </label>
+          <select
+            id="f-state"
+            className="select"
+            value={value.state ?? ''}
+            onChange={(e) => onChange({ state: e.target.value || undefined, city: undefined, neighborhood: undefined })}
+          >
+            <option value="">Todos los estados</option>
+            {states.map((s) => (
+              <option key={s} value={s}>
+                {s} ({tree[s].total})
+              </option>
+            ))}
+            {value.state && !tree[value.state] && <option value={value.state}>{value.state}</option>}
+          </select>
+        </div>
+
+        <div className="field">
+          <label htmlFor="f-city" className={styles.sublabel}>
+            Municipio
+          </label>
+          <select
+            id="f-city"
+            className="select"
+            value={value.city ?? ''}
+            disabled={!value.state}
+            onChange={(e) => onChange({ city: e.target.value || undefined, neighborhood: undefined })}
+          >
+            <option value="">{value.state ? 'Todos los municipios' : 'Elige un estado primero'}</option>
+            {cities.map((c) => (
+              <option key={c} value={c}>
+                {c} ({tree[value.state!].cities[c].total})
+              </option>
+            ))}
+            {value.city && !cities.includes(value.city) && <option value={value.city}>{value.city}</option>}
+          </select>
+        </div>
+
+        <div className="field">
+          <label htmlFor="f-col" className={styles.sublabel}>
+            Colonia
+          </label>
+          <select
+            id="f-col"
+            className="select"
+            value={value.neighborhood ?? ''}
+            disabled={!value.city}
+            onChange={(e) => onChange({ neighborhood: e.target.value || undefined })}
+          >
+            <option value="">{value.city ? 'Todas las colonias' : 'Elige un municipio primero'}</option>
+            {neighborhoods.map((n) => (
+              <option key={n.name} value={n.name}>
+                {n.name} ({n.total})
+              </option>
+            ))}
+            {value.neighborhood && !neighborhoods.some((n) => n.name === value.neighborhood) && (
+              <option value={value.neighborhood}>{value.neighborhood}</option>
+            )}
+          </select>
+        </div>
+      </fieldset>
+
+      {/* ---------- Operación y tipo ---------- */}
       <div className={styles.group}>
         <span className={styles.label}>Operación</span>
         <div className={styles.segment}>
@@ -138,26 +231,17 @@ export default function PropertyFilters({ value, onChange, onClear, locations }:
         </select>
       </div>
 
-      <div className={styles.group}>
-        <span className={styles.label}>Precio (MXN)</span>
-        <div className={styles.range}>
-          <input className="input" inputMode="numeric" placeholder="Mínimo" value={minPrice} onChange={(e) => setMinPrice(onlyDigits(e.target.value))} aria-label="Precio mínimo" />
-          <span>—</span>
-          <input className="input" inputMode="numeric" placeholder="Máximo" value={maxPrice} onChange={(e) => setMaxPrice(onlyDigits(e.target.value))} aria-label="Precio máximo" />
-        </div>
-      </div>
+      {/* ---------- Precio y medidas ---------- */}
+      <RangeField label="Precio" unit="MXN" min={value.minPrice} max={value.maxPrice} onChange={(a, b) => onChange({ minPrice: a, maxPrice: b })} />
 
       <CountChips label="Recámaras" value={value.bedrooms} onChange={(v) => onChange({ bedrooms: v })} />
       <CountChips label="Baños" value={value.bathrooms} onChange={(v) => onChange({ bathrooms: v })} />
       <CountChips label="Estacionamientos" value={value.parking} onChange={(v) => onChange({ parking: v })} />
 
-      <div className={styles.group}>
-        <label className={styles.label} htmlFor="f-m2">
-          Construcción mínima (m²)
-        </label>
-        <input id="f-m2" className="input" inputMode="numeric" placeholder="Ej. 150" value={minM2} onChange={(e) => setMinM2(onlyDigits(e.target.value))} />
-      </div>
+      <RangeField label="Metros de construcción" unit="m²" min={value.minM2} max={value.maxM2} onChange={(a, b) => onChange({ minM2: a, maxM2: b })} />
+      <RangeField label="Metros de terreno" unit="m²" min={value.minLand} max={value.maxLand} onChange={(a, b) => onChange({ minLand: a, maxLand: b })} />
 
+      {/* ---------- Amenidades ---------- */}
       <div className={styles.group}>
         <span className={styles.label}>Amenidades</span>
         <div className={styles.amenities}>

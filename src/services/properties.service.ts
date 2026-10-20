@@ -14,6 +14,12 @@ export interface PropertySearchFilters {
   bathrooms?: number;
   parking?: number;
   minM2?: number;
+  maxM2?: number;
+  minLand?: number;
+  maxLand?: number;
+  state?: string;
+  city?: string;
+  neighborhood?: string;
   amenities?: string[];
   agent?: string;
   sort?: SortOption;
@@ -52,6 +58,12 @@ export async function searchProperties(f: PropertySearchFilters): Promise<{ data
   if (f.bathrooms) query = query.gte('bathrooms', f.bathrooms);
   if (f.parking) query = query.gte('parking_spaces', f.parking);
   if (f.minM2) query = query.gte('construction_m2', f.minM2);
+  if (f.maxM2) query = query.lte('construction_m2', f.maxM2);
+  if (f.minLand) query = query.gte('land_m2', f.minLand);
+  if (f.maxLand) query = query.lte('land_m2', f.maxLand);
+  if (f.state) query = query.eq('state', f.state);
+  if (f.city) query = query.eq('city', f.city);
+  if (f.neighborhood) query = query.eq('neighborhood', f.neighborhood);
   if (f.amenities?.length) query = query.contains('amenities', f.amenities);
   if (f.agent && /^[0-9a-f-]{36}$/i.test(f.agent)) query = query.eq('agent_id', f.agent);
 
@@ -119,6 +131,35 @@ export async function getSimilarProperties(p: Property, limit = 3): Promise<Prop
     .neq('id', p.id)
     .limit(limit);
   return (any ?? []) as unknown as Property[];
+}
+
+export interface LocationTree {
+  /** estado → municipio → colonias (con conteo de propiedades) */
+  [state: string]: { total: number; cities: { [city: string]: { total: number; neighborhoods: Array<{ name: string; total: number }> } } };
+}
+
+let treeCache: Promise<LocationTree> | null = null;
+
+export function getLocationTree(): Promise<LocationTree> {
+  if (!treeCache) {
+    treeCache = Promise.resolve(supabase.rpc('get_location_tree')).then(({ data, error }) => {
+      const tree: LocationTree = {};
+      if (error) {
+        treeCache = null;
+        return tree;
+      }
+      for (const row of (data ?? []) as Array<{ state: string; city: string; neighborhood: string | null; total: number }>) {
+        const n = Number(row.total);
+        const st = (tree[row.state] ??= { total: 0, cities: {} });
+        st.total += n;
+        const ct = (st.cities[row.city] ??= { total: 0, neighborhoods: [] });
+        ct.total += n;
+        if (row.neighborhood) ct.neighborhoods.push({ name: row.neighborhood, total: n });
+      }
+      return tree;
+    });
+  }
+  return treeCache;
 }
 
 export async function getLocationSuggestions(): Promise<Array<{ label: string; kind: string }>> {

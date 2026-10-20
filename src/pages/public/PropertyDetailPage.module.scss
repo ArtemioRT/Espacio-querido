@@ -395,7 +395,7 @@
 
   @include up($bp-lg) {
     position: sticky;
-    top: $header-h + 16px;
+    top: $header-h-lg + 16px;
     align-self: start;
   }
 }
