@@ -257,17 +257,6 @@ export default function PropertyDetailPage() {
               <div className={styles.map}>
                 <iframe title="Mapa de la propiedad" src={mapSrc} loading="lazy" />
               </div>
-              <a
-                className={styles.mapLink}
-                href={`https://www.google.com/maps/search/?api=1&query=${p.latitude},${p.longitude}`}
-                target="_blank"
-                rel="noreferrer"
-                data-track="click"
-                data-track-label="Abrir en Google Maps"
-                data-track-property={p.id}
-              >
-                Abrir en Google Maps
-              </a>
             </section>
           )}
         </div>
