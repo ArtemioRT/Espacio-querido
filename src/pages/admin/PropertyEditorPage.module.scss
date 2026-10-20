@@ -1,0 +1,195 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: $color-muted;
+  margin-bottom: 8px;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+.layout {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr;
+
+  @include up($bp-xl) {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @include up($bp-xl) {
+    position: sticky;
+    top: 84px;
+    align-self: start;
+  }
+
+  // En móvil la caja de guardado va primero
+  @include down($bp-xl) {
+    order: -1;
+  }
+}
+
+.map {
+  margin-top: 14px;
+  aspect-ratio: 16 / 7;
+  border-radius: $radius;
+  overflow: hidden;
+  background: #eee;
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+}
+
+.amenities {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.amenity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid $color-border;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  input {
+    accent-color: $color-primary;
+  }
+
+  &:hover {
+    border-color: rgba($color-primary, 0.5);
+  }
+}
+
+.amenityOn {
+  border-color: $color-primary;
+  background: $color-primary-light;
+}
+
+.customAmenity {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  max-width: 440px;
+}
+
+.statusList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.statusOpt {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  cursor: pointer;
+
+  input {
+    margin-top: 3px;
+    accent-color: $color-primary;
+  }
+
+  strong {
+    display: block;
+    font-size: 13px;
+  }
+
+  span {
+    display: block;
+    font-size: 12px;
+    color: $color-muted;
+  }
+}
+
+.statusOn {
+  border-color: $color-primary;
+  background: $color-primary-light;
+}
+
+.saveBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid $color-border;
+}
+
+.progress {
+  font-size: 12px;
+  color: $color-info;
+  text-align: center;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+
+  dt {
+    color: $color-muted;
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+  }
+}
+
+.slug {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.agentBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  strong {
+    display: block;
+    font-size: 13px;
+  }
+
+  span {
+    display: block;
+    font-size: 12px;
+    color: $color-muted;
+  }
+}

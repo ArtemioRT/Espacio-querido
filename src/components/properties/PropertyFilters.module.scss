@@ -1,0 +1,130 @@
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $color-text;
+}
+
+.inputWrap {
+  position: relative;
+
+  :global(.input) {
+    padding-right: 34px;
+  }
+}
+
+.clearInput {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: none;
+  color: $color-muted;
+  padding: 4px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.segment {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  overflow: hidden;
+}
+
+.segmentBtn {
+  border: 0;
+  background: $white;
+  padding: 9px 6px;
+  font-size: 13px;
+  border-right: 1px solid $color-border;
+  transition: all 0.2s;
+
+  &:last-child {
+    border-right: 0;
+  }
+}
+
+.segmentActive {
+  background: $color-primary;
+  color: $white;
+}
+
+.range {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+
+  span {
+    color: $color-muted;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  border: 1px solid $color-border;
+  background: $white;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: $color-primary;
+  }
+}
+
+.chipActive {
+  background: $color-primary;
+  border-color: $color-primary;
+  color: $white;
+}
+
+.amenities {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+
+  @include up($bp-sm) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @include up($bp-lg) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.more {
+  align-self: flex-start;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-primary;
+  text-decoration: underline;
+}

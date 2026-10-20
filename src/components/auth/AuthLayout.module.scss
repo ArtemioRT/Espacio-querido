@@ -1,0 +1,102 @@
+.wrap {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: $color-bg-soft;
+
+  @include up($bp-lg) {
+    grid-template-columns: 1.1fr 1fr;
+  }
+}
+
+.side {
+  display: none;
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-color: $color-primary;
+
+  @include up($bp-lg) {
+    display: block;
+  }
+}
+
+.sideOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba($color-primary, 0.85), rgba($color-black, 0.65));
+}
+
+.sideText {
+  position: absolute;
+  left: 48px;
+  right: 48px;
+  bottom: 56px;
+  color: $white;
+
+  img {
+    height: 44px;
+    width: auto;
+    margin-bottom: 18px;
+  }
+
+  p {
+    font-family: $font-serif;
+    font-size: 24px;
+    line-height: 1.4;
+    max-width: 440px;
+  }
+}
+
+.panel {
+  @include flex-center;
+  padding: 32px 16px;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: $white;
+  border-radius: $radius-lg;
+  padding: 36px 28px;
+  box-shadow: $shadow;
+
+  @include up($bp-sm) {
+    padding: 44px 40px;
+  }
+
+  h1 {
+    font-size: 28px;
+    margin: 24px 0 6px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+  }
+}
+
+.logo img {
+  height: 34px;
+  width: auto;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: $color-muted;
+  margin: 0;
+}
+
+.footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: $color-muted;
+
+  a {
+    color: $color-primary;
+    font-weight: 600;
+  }
+}

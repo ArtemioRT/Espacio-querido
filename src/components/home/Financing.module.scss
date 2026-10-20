@@ -1,0 +1,39 @@
+.grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 640px;
+  margin: 0 auto;
+
+  @include up($bp-md) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px 40px;
+  }
+}
+
+.tile {
+  @include flex-center;
+  aspect-ratio: 1.15;
+  background: $color-black;
+  border-radius: $radius;
+  padding: 14px;
+  transition: transform 0.25s $ease, box-shadow 0.25s;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: $shadow;
+  }
+
+  img {
+    max-height: 34px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  span {
+    color: $white;
+    font-weight: 700;
+    font-size: 13px;
+    text-align: center;
+  }
+}

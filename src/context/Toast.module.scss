@@ -1,0 +1,63 @@
+.stack {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: 420px;
+  padding: 12px 14px;
+  background: $white;
+  border-radius: $radius;
+  box-shadow: $shadow-lg;
+  border-left: 4px solid;
+  font-size: 13px;
+  animation: fadeUp 0.25s $ease;
+
+  > svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  span {
+    flex: 1;
+  }
+
+  button {
+    border: 0;
+    background: none;
+    padding: 2px;
+    color: $color-muted;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+.success {
+  border-color: $color-success;
+
+  > svg {
+    color: $color-success;
+  }
+}
+
+.error {
+  border-color: $color-danger;
+
+  > svg {
+    color: $color-danger;
+  }
+}

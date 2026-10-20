@@ -1,0 +1,528 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: $header-h;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: $font-sans;
+  font-size: 15px;
+  line-height: 1.6;
+  color: $color-text;
+  background: $white;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: $font-serif;
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 0 0 0.5em;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+:focus-visible {
+  @include focus-ring;
+}
+
+::selection {
+  background: rgba($color-primary, 0.18);
+}
+
+// ---------- Layout ----------
+.container {
+  width: 100%;
+  max-width: $container;
+  margin: 0 auto;
+  padding: 0 16px;
+
+  @include up($bp-md) {
+    padding: 0 24px;
+  }
+}
+
+.section {
+  padding: 64px 0;
+  position: relative;
+
+  @include up($bp-lg) {
+    padding: 88px 0;
+  }
+
+  &--soft {
+    background: $color-bg-soft;
+  }
+}
+
+.section-title {
+  font-family: $font-serif;
+  color: $color-primary;
+  font-size: clamp(28px, 4vw, 40px);
+  text-align: center;
+  margin: 0 0 40px;
+}
+
+// ---------- Botones ----------
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 22px;
+  border-radius: $radius-sm;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: background 0.2s $ease, color 0.2s $ease, border-color 0.2s $ease, transform 0.15s $ease;
+  background: transparent;
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  &--primary {
+    background: $color-primary;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background: $color-primary-dark;
+    }
+  }
+
+  &--outline {
+    border-color: $color-primary;
+    color: $color-primary;
+
+    &:hover:not(:disabled) {
+      background: $color-primary;
+      color: $white;
+    }
+  }
+
+  &--light {
+    border-color: rgba($white, 0.85);
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background: $white;
+      color: $color-primary;
+    }
+  }
+
+  &--ghost {
+    color: $color-text;
+    background: $white;
+    border-color: $color-border;
+
+    &:hover:not(:disabled) {
+      border-color: $color-text;
+    }
+  }
+
+  &--danger {
+    background: $color-danger;
+    color: $white;
+
+    &:hover:not(:disabled) {
+      background: color.adjust($color-danger, $lightness: -8%);
+    }
+  }
+
+  &--sm {
+    min-height: 34px;
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  &--block {
+    width: 100%;
+  }
+
+  &--icon {
+    padding: 0;
+    width: 38px;
+    min-height: 38px;
+  }
+}
+
+// ---------- Formularios ----------
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  > label,
+  &__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  &__hint {
+    font-size: 12px;
+    color: $color-muted;
+  }
+
+  &__error {
+    font-size: 12px;
+    color: $color-danger;
+  }
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  background: $white;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &::placeholder {
+    color: #a5a5a5;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.12);
+  }
+
+  &.is-invalid {
+    border-color: $color-danger;
+  }
+}
+
+.select {
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236f6f6f' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    width: 16px;
+    height: 16px;
+    accent-color: $color-primary;
+  }
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  @include up($bp-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  &--3 {
+    @include up($bp-lg) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  &--4 {
+    grid-template-columns: repeat(2, 1fr);
+
+    @include up($bp-lg) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .span-full {
+    grid-column: 1 / -1;
+  }
+
+  .span-2 {
+    @include up($bp-md) {
+      grid-column: span 2;
+    }
+  }
+}
+
+.alert {
+  padding: 12px 14px;
+  border-radius: $radius-sm;
+  font-size: 13px;
+  border: 1px solid;
+
+  &--error {
+    background: color.adjust($color-danger, $lightness: 42%);
+    border-color: color.adjust($color-danger, $lightness: 30%);
+    color: color.adjust($color-danger, $lightness: -10%);
+  }
+
+  &--success {
+    background: color.adjust($color-success, $lightness: 55%);
+    border-color: color.adjust($color-success, $lightness: 40%);
+    color: color.adjust($color-success, $lightness: -5%);
+  }
+
+  &--info {
+    background: color.adjust($color-info, $lightness: 50%);
+    border-color: color.adjust($color-info, $lightness: 38%);
+    color: $color-info;
+  }
+}
+
+// ---------- Badges ----------
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  background: $color-bg-soft;
+  color: $color-text;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &--plain::before {
+    display: none;
+  }
+
+  &--success {
+    background: color.adjust($color-success, $lightness: 55%);
+    color: $color-success;
+  }
+
+  &--warning {
+    background: color.adjust($color-warning, $lightness: 50%);
+    color: color.adjust($color-warning, $lightness: -6%);
+  }
+
+  &--danger {
+    background: color.adjust($color-danger, $lightness: 42%);
+    color: $color-danger;
+  }
+
+  &--info {
+    background: color.adjust($color-info, $lightness: 50%);
+    color: $color-info;
+  }
+
+  &--primary {
+    background: $color-primary-light;
+    color: $color-primary;
+  }
+
+  &--muted {
+    background: #ececec;
+    color: $color-muted;
+  }
+}
+
+// ---------- Tablas ----------
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $color-muted;
+    padding: 12px 14px;
+    border-bottom: 1px solid $color-border;
+    white-space: nowrap;
+    background: #fafafa;
+  }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid $color-border;
+    vertical-align: middle;
+  }
+
+  tbody tr:hover {
+    background: #fcfafa;
+  }
+}
+
+// ---------- Utilidades ----------
+.card {
+  background: $white;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.text-muted {
+  color: $color-muted;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid rgba($color-primary, 0.18);
+  border-top-color: $color-primary;
+  animation: spin 0.8s linear infinite;
+
+  &--sm {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+  }
+
+  &--light {
+    border-color: rgba($white, 0.35);
+    border-top-color: $white;
+  }
+}
+
+.page-loader {
+  @include flex-center;
+  min-height: 50vh;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 56px 16px;
+  color: $color-muted;
+
+  svg {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 12px;
+    color: #c4c4c4;
+  }
+
+  h3 {
+    color: $color-text;
+    font-size: 20px;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #eee 25%, #f6f6f6 37%, #eee 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: $radius-sm;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

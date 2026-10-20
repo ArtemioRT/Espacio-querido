@@ -1,0 +1,19 @@
+.grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+
+  @include up($bp-sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include up($bp-lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  margin-top: 36px;
+}

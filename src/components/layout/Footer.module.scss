@@ -1,0 +1,128 @@
+.footer {
+  background: $color-black;
+  color: rgba($white, 0.85);
+  padding: 56px 0 24px;
+  font-size: 13px;
+}
+
+.grid {
+  display: grid;
+  gap: 32px;
+  grid-template-columns: 1fr;
+
+  @include up($bp-md) {
+    grid-template-columns: 120px 1.4fr 1fr;
+  }
+
+  @include up($bp-lg) {
+    grid-template-columns: 140px 1.6fr 1fr 1fr;
+  }
+}
+
+.icon {
+  width: 72px;
+  height: auto;
+}
+
+.contact {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  h4 {
+    font-family: $font-sans;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: $white;
+    margin-bottom: 6px;
+  }
+
+  a,
+  p {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 0;
+    transition: color 0.2s;
+  }
+
+  a:hover {
+    color: $white;
+  }
+
+  svg {
+    width: 15px;
+    height: 15px;
+    margin-top: 3px;
+    flex-shrink: 0;
+    color: rgba($white, 0.6);
+  }
+
+  strong {
+    color: $white;
+    font-weight: 600;
+  }
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  a:hover {
+    color: $white;
+  }
+}
+
+.join {
+  span {
+    display: block;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: $white;
+    margin-bottom: 12px;
+  }
+}
+
+.social {
+  display: flex;
+  gap: 10px;
+
+  a {
+    @include flex-center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba($white, 0.3);
+    border-radius: 50%;
+    transition: all 0.2s;
+
+    &:hover {
+      background: $color-primary;
+      border-color: $color-primary;
+    }
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.bottom {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba($white, 0.12);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: rgba($white, 0.55);
+}
+
+.admin:hover {
+  color: $white;
+}

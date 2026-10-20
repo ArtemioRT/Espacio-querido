@@ -1,0 +1,52 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: $white;
+  padding: 22px;
+  border-radius: $radius-sm;
+  color: $color-text;
+}
+
+.row {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+
+  @include up($bp-sm) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.accept {
+  font-size: 12px;
+  color: $color-muted;
+}
+
+.submit {
+  align-self: flex-end;
+  min-width: 130px;
+}
+
+.success {
+  align-items: center;
+  text-align: center;
+  padding: 36px 24px;
+
+  svg {
+    width: 44px;
+    height: 44px;
+    color: $color-success;
+  }
+
+  h3 {
+    font-size: 22px;
+    margin: 6px 0 0;
+  }
+
+  p {
+    font-size: 13px;
+    color: $color-muted;
+    margin: 0;
+  }
+}

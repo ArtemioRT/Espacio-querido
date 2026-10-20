@@ -1,0 +1,146 @@
+.section {
+  background: $color-bg-soft;
+  padding: 56px 0 64px;
+
+  @include up($bp-lg) {
+    padding: 72px 0 88px;
+  }
+}
+
+.title {
+  font-family: $font-sans;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-align: center;
+  font-size: clamp(22px, 3.2vw, 34px);
+  letter-spacing: 0.01em;
+  color: $color-black;
+  margin: 0;
+}
+
+.rule {
+  display: block;
+  width: 68px;
+  height: 4px;
+  border-radius: 2px;
+  background: $color-primary;
+  margin: 16px auto 40px;
+
+  @include up($bp-lg) {
+    margin-bottom: 64px;
+  }
+}
+
+.card {
+  max-width: 1140px;
+  margin: 0 auto;
+  background: $white;
+  border-radius: 16px;
+  padding: 28px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @include up($bp-md) {
+    padding: 44px 36px 40px;
+  }
+}
+
+.grid {
+  display: grid;
+  gap: 20px 36px;
+  grid-template-columns: 1fr;
+
+  @include up($bp-md) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  :global(.field) > label {
+    font-size: 15px;
+    font-weight: 600;
+    color: $color-black;
+  }
+}
+
+.input {
+  min-height: 56px;
+  border-radius: 8px;
+  font-size: 16px;
+  padding-left: 18px;
+}
+
+textarea.input {
+  min-height: 142px;
+  padding-top: 14px;
+}
+
+.legal {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: $color-muted;
+}
+
+.submit {
+  align-self: center;
+  min-width: 280px;
+  min-height: 54px;
+  padding: 0 36px;
+  border: 0;
+  border-radius: 999px;
+  background: $color-primary;
+  color: $white;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-dark;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+
+  @include down($bp-sm) {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+.sent {
+  align-items: center;
+  text-align: center;
+  padding: 48px 24px;
+
+  svg {
+    width: 52px;
+    height: 52px;
+    color: $color-success;
+  }
+
+  h3 {
+    font-size: 26px;
+    margin: 4px 0 0;
+  }
+
+  p {
+    margin: 0;
+    color: $color-muted;
+  }
+}

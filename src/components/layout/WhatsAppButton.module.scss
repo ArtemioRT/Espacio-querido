@@ -1,0 +1,28 @@
+.fab {
+  position: fixed;
+  right: 18px;
+  bottom: 88px;
+  z-index: 90;
+  @include flex-center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #25d366;
+  color: $white;
+  box-shadow: 0 8px 22px rgba(37, 211, 102, 0.4);
+  transition: transform 0.2s $ease;
+
+  &:hover {
+    transform: scale(1.07);
+  }
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  @include up($bp-lg) {
+    bottom: 28px;
+    right: 28px;
+  }
+}

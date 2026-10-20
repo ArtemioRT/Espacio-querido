@@ -1,0 +1,46 @@
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+
+  button {
+    @include flex-center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    background: $white;
+    font-size: 13px;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      border-color: $color-primary;
+      color: $color-primary;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.active {
+  background: $color-primary !important;
+  border-color: $color-primary !important;
+  color: $white !important;
+}
+
+.ellipsis {
+  padding: 0 4px;
+  color: $color-muted;
+}

@@ -1,0 +1,43 @@
+@use 'variables' as *;
+
+@mixin up($bp) {
+  @media (min-width: $bp) {
+    @content;
+  }
+}
+
+@mixin down($bp) {
+  @media (max-width: ($bp - 0.02px)) {
+    @content;
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin line-clamp($lines) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Círculos concéntricos decorativos del diseño original
+@mixin rings($color: rgba(0, 0, 0, 0.06), $size: 520px) {
+  content: '';
+  position: absolute;
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  pointer-events: none;
+  background: repeating-radial-gradient(circle, transparent 0 22px, $color 22px 23px);
+  mask-image: radial-gradient(circle, #000 55%, transparent 71%);
+}
+
+@mixin focus-ring {
+  outline: 2px solid rgba($color-primary, 0.45);
+  outline-offset: 2px;
+}

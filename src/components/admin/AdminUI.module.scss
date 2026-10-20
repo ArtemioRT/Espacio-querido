@@ -1,0 +1,257 @@
+.pageHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  h1 {
+    font-size: clamp(24px, 3vw, 30px);
+    margin: 0;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: $color-muted;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.panel {
+  background: $white;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid $color-border;
+
+  h2 {
+    font-family: $font-sans;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.panelBody {
+  padding: 18px 20px;
+}
+
+// --- Stat card ---
+.stat {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: $white;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: 18px;
+  min-width: 0;
+}
+
+.statIcon {
+  @include flex-center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  background: $color-bg-soft;
+  color: $color-text;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.tone_primary .statIcon {
+  background: $color-primary-light;
+  color: $color-primary;
+}
+
+.tone_success .statIcon {
+  background: color.adjust($color-success, $lightness: 55%);
+  color: $color-success;
+}
+
+.tone_info .statIcon {
+  background: color.adjust($color-info, $lightness: 50%);
+  color: $color-info;
+}
+
+.tone_warning .statIcon {
+  background: color.adjust($color-warning, $lightness: 50%);
+  color: color.adjust($color-warning, $lightness: -5%);
+}
+
+.statLabel {
+  display: block;
+  font-size: 12px;
+  color: $color-muted;
+  font-weight: 500;
+}
+
+.statValue {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.statHint {
+  display: block;
+  font-size: 11px;
+  color: $color-muted;
+  margin-top: 2px;
+}
+
+// --- Modal ---
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+
+  @include up($bp-sm) {
+    align-items: center;
+    padding: 24px;
+  }
+}
+
+.modal {
+  background: $white;
+  width: 100%;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: $radius-lg $radius-lg 0 0;
+  box-shadow: $shadow-lg;
+  animation: fadeUp 0.25s $ease;
+
+  @include up($bp-sm) {
+    border-radius: $radius-lg;
+  }
+}
+
+.modal_sm {
+  @include up($bp-sm) {
+    max-width: 440px;
+  }
+}
+
+.modal_md {
+  @include up($bp-sm) {
+    max-width: 620px;
+  }
+}
+
+.modal_lg {
+  @include up($bp-sm) {
+    max-width: 920px;
+  }
+}
+
+.modalHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid $color-border;
+
+  h2 {
+    font-family: $font-sans;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  button {
+    border: 0;
+    background: none;
+    padding: 4px;
+    color: $color-muted;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.modalBody {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modalFoot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 20px;
+  border-top: 1px solid $color-border;
+}
+
+// --- Tabs ---
+.tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  border-bottom: 1px solid $color-border;
+  scrollbar-width: none;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: none;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: $color-muted;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  margin-bottom: -1px;
+
+  span {
+    font-size: 11px;
+    font-weight: 700;
+    background: $color-bg-soft;
+    border-radius: 999px;
+    padding: 1px 8px;
+  }
+}
+
+.tabActive {
+  color: $color-primary;
+  border-bottom-color: $color-primary;
+
+  span {
+    background: $color-primary-light;
+    color: $color-primary;
+  }
+}

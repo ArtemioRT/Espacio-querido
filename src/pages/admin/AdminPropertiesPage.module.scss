@@ -1,0 +1,287 @@
+.uploadWrap {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 60;
+  width: 290px;
+  background: $white;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  box-shadow: $shadow-lg;
+  padding: 6px;
+  animation: fadeUp 0.18s $ease;
+
+  a,
+  button {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    width: 100%;
+    padding: 12px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    text-align: left;
+
+    &:hover {
+      background: $color-bg-soft;
+    }
+
+    > svg {
+      width: 18px;
+      height: 18px;
+      color: $color-primary;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+  }
+
+  strong {
+    display: block;
+    font-size: 13px;
+  }
+
+  span {
+    display: block;
+    font-size: 12px;
+    color: $color-muted;
+  }
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid $color-border;
+}
+
+.agentFilter {
+  width: auto;
+  min-width: 200px;
+}
+
+.code {
+  font-weight: 600;
+  color: $color-text;
+}
+
+.agentRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.assign {
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: $color-text;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  max-width: 200px;
+
+  &:hover {
+    background: $color-bg-soft;
+  }
+}
+
+.search {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+  max-width: 460px;
+
+  svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: $color-muted;
+  }
+
+  :global(.input) {
+    padding-left: 36px;
+  }
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid $color-border;
+  align-items: center;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  @include up($bp-lg) {
+    grid-template-columns: 120px 1fr auto;
+    gap: 18px;
+  }
+}
+
+.thumb {
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #eee;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+.sub {
+  font-size: 12px;
+  color: $color-muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: $color-muted;
+
+  strong {
+    color: $color-primary;
+    font-size: 13px;
+  }
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  svg {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+.controls {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  @include up($bp-lg) {
+    grid-column: auto;
+    justify-content: flex-end;
+  }
+}
+
+.statusSelect {
+  width: auto;
+  min-width: 170px;
+  min-height: 36px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status_active {
+  border-color: rgba($color-success, 0.45);
+  color: $color-success;
+  background-color: color.adjust($color-success, $lightness: 57%);
+}
+
+.status_draft {
+  color: $color-muted;
+  background-color: #f6f6f6;
+}
+
+.status_finished {
+  border-color: rgba($color-primary, 0.4);
+  color: $color-primary;
+  background-color: $color-primary-light;
+}
+
+.actions {
+  display: flex;
+  gap: 2px;
+
+  a,
+  button {
+    @include flex-center;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    border: 0;
+    background: none;
+    color: $color-muted;
+    transition: all 0.2s;
+
+    &:hover {
+      background: $color-bg-soft;
+      color: $color-primary;
+    }
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.starred {
+  color: #d99a06 !important;
+
+  svg {
+    fill: #f3c34a;
+  }
+}

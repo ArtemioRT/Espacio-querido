@@ -1,0 +1,67 @@
+.banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 150;
+  background: $color-primary;
+  color: $white;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 12px;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.15);
+  animation: fadeUp 0.35s $ease;
+
+  @include up($bp-lg) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 32px;
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.options {
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+.accept {
+  background: $white;
+  color: $color-primary;
+
+  &:hover {
+    background: $color-primary-light;
+  }
+}
+
+.close {
+  border: 0;
+  background: none;
+  color: $white;
+  padding: 4px;
+  margin-left: auto;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}

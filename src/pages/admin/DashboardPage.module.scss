@@ -1,0 +1,303 @@
+.range {
+  display: inline-flex;
+  background: $white;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  padding: 3px;
+
+  button {
+    border: 0;
+    background: none;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $color-muted;
+    border-radius: 6px;
+  }
+}
+
+.rangeActive {
+  background: $color-primary !important;
+  color: $white !important;
+}
+
+.liveBar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  background: $white;
+  border: 1px solid $color-border;
+  border-radius: 999px;
+  padding: 6px 14px;
+  margin-bottom: 18px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $color-success;
+  box-shadow: 0 0 0 0 rgba($color-success, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  70% {
+    box-shadow: 0 0 0 8px rgba($color-success, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba($color-success, 0);
+  }
+}
+
+.stats {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  margin-bottom: 20px;
+  transition: opacity 0.2s;
+}
+
+.loading {
+  opacity: 0.55;
+}
+
+.chartPanel {
+  margin-bottom: 20px;
+}
+
+.legend {
+  display: flex;
+  gap: 18px;
+  font-size: 12px;
+  color: $color-muted;
+  margin-bottom: 8px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  i {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+}
+
+.chart {
+  height: 280px;
+}
+
+.grid2,
+.grid3 {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 20px;
+  grid-template-columns: 1fr;
+}
+
+.grid2 {
+  @include up($bp-xl) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.grid3 {
+  @include up($bp-md) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @include up($bp-xl) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.barList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+.barTrack {
+  position: relative;
+  flex: 1;
+  height: 30px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f7f6f5;
+}
+
+.barFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: $color-primary-light;
+  border-radius: 6px;
+}
+
+.barLabel {
+  position: relative;
+  line-height: 30px;
+  padding: 0 10px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.barValue {
+  min-width: 70px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+
+  small {
+    font-weight: 400;
+    color: $color-muted;
+    margin-left: 4px;
+  }
+}
+
+.empty {
+  margin: 0;
+  font-size: 13px;
+  color: $color-muted;
+}
+
+.more {
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-primary;
+}
+
+.propCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+
+  img,
+  span {
+    width: 44px;
+    height: 32px;
+    border-radius: 4px;
+    object-fit: cover;
+    background: #eee;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    color: $color-primary;
+  }
+}
+
+.path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dashed $color-border;
+    font-size: 13px;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: $color-muted;
+  }
+
+  span {
+    flex: 1;
+  }
+}
+
+.recent {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+}
+
+.recentAvatar {
+  @include flex-center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: $color-primary-light;
+  color: $color-primary;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.recentText {
+  flex: 1;
+  min-width: 0;
+
+  strong {
+    display: block;
+    font-size: 13px;
+  }
+
+  span {
+    display: block;
+    font-size: 12px;
+    color: $color-muted;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.recentMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+
+  small {
+    font-size: 11px;
+    color: $color-muted;
+  }
+}
