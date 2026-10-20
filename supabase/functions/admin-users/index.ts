@@ -11,7 +11,53 @@
 // Los demás cambios (nombre, teléfono, rol, activar/desactivar, foto) los hace el admin
 // directamente sobre la tabla profiles gracias a RLS.
 
-import { corsHeaders, json, requireAdmin, serviceClient } from '../_shared/utils.ts';
+// ---------------------------------------------------------------------
+// Utilidades (autocontenidas: este archivo se puede pegar tal cual en
+// Supabase → Edge Functions → editor, o desplegar con el CLI)
+// ---------------------------------------------------------------------
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
+/** Llave de servicio: funciona con llaves clásicas (service_role) y nuevas (sb_secret_…) */
+function serviceKey(): string {
+  const direct = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SECRET_KEY');
+  if (direct) return direct;
+  const many = Deno.env.get('SUPABASE_SECRET_KEYS');
+  if (many) {
+    try {
+      const parsed = JSON.parse(many);
+      const first = typeof parsed === 'string' ? parsed : Object.values(parsed)[0];
+      if (typeof first === 'string') return first;
+    } catch {
+      return many;
+    }
+  }
+  throw new Error('No se encontró la llave de servicio de Supabase en la función.');
+}
+
+function serviceClient(): SupabaseClient {
+  return createClient(Deno.env.get('SUPABASE_URL')!, serviceKey(), { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
+/** Devuelve el id del usuario si es administrador activo; null en otro caso. */
+async function requireAdmin(req: Request): Promise<string | null> {
+  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
+  if (!token) return null;
+  const admin = serviceClient();
+  const { data, error } = await admin.auth.getUser(token);
+  if (error || !data.user) return null;
+  const { data: profile } = await admin.from('profiles').select('role, active').eq('id', data.user.id).maybeSingle();
+  return profile?.role === 'admin' && profile.active ? data.user.id : null;
+}
+// ---------------------------------------------------------------------
 
 const isEmail = (v: unknown) => typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 const clean = (v: unknown, max = 120) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null);

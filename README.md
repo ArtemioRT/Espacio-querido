@@ -63,6 +63,11 @@ Authentication → URL Configuration:
 - **Redirect URLs**: `https://tudominio.com/admin/restablecer-contrasena` y `http://localhost:5173/admin/restablecer-contrasena`
 
 ### 4. Edge Functions
+Cada función es un solo `index.ts` autocontenido. Dos formas de publicarlas:
+
+**Desde el dashboard:** Edge Functions → *Deploy a new function* → *Via Editor* → nómbrala exactamente `easybroker-import` (o `admin-users`, `submit-lead`), borra la plantilla, pega el contenido de `supabase/functions/<nombre>/index.ts` y *Deploy*. En *Secrets* agrega `EASYBROKER_API_KEY`. En `submit-lead` desactiva *Verify JWT*.
+
+**Con el CLI:**
 ```bash
 supabase functions deploy admin-users          # alta/baja de asesores
 supabase functions deploy easybroker-import    # importación (solo admin)

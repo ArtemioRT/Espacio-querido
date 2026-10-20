@@ -6,7 +6,43 @@
 // Una vez activo, quita la inserción pública directa:
 //   drop policy "leads_public_insert" on public.leads;
 
-import { corsHeaders, json, serviceClient } from '../_shared/utils.ts';
+// ---------------------------------------------------------------------
+// Utilidades (autocontenidas: este archivo se puede pegar tal cual en
+// Supabase → Edge Functions → editor, o desplegar con el CLI)
+// ---------------------------------------------------------------------
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
+/** Llave de servicio: funciona con llaves clásicas (service_role) y nuevas (sb_secret_…) */
+function serviceKey(): string {
+  const direct = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SECRET_KEY');
+  if (direct) return direct;
+  const many = Deno.env.get('SUPABASE_SECRET_KEYS');
+  if (many) {
+    try {
+      const parsed = JSON.parse(many);
+      const first = typeof parsed === 'string' ? parsed : Object.values(parsed)[0];
+      if (typeof first === 'string') return first;
+    } catch {
+      return many;
+    }
+  }
+  throw new Error('No se encontró la llave de servicio de Supabase en la función.');
+}
+
+function serviceClient(): SupabaseClient {
+  return createClient(Deno.env.get('SUPABASE_URL')!, serviceKey(), { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
+// ---------------------------------------------------------------------
 
 const INTERESTS = ['venta', 'compra', 'renta', 'inversion', 'propiedad', 'otro'];
 const str = (v: unknown, max: number) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null);
