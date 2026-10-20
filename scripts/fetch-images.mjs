@@ -122,12 +122,43 @@ for (const job of jobs) {
   }
 }
 
-// Favicon PNG a partir del ícono circular
+// Favicons a partir del ícono circular: .ico (16/32/48), PNG y apple-touch-icon
 try {
   const icon = path.join(OUT, 'logo-icon.webp');
   if (await exists(icon)) {
-    await sharp(icon).resize(64, 64, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toFile(path.join(OUT, 'favicon.png'));
-    console.log('✓ favicon.png');
+    const png = (size, opts = {}) =>
+      sharp(icon)
+        .resize(size, size, { fit: 'contain', background: opts.bg ?? { r: 0, g: 0, b: 0, alpha: 0 } })
+        .flatten(opts.bg ? { background: opts.bg } : false)
+        .png()
+        .toBuffer();
+
+    await writeFile(path.join(OUT, 'favicon.png'), await png(64));
+    await writeFile(path.join(OUT, 'apple-touch-icon.png'), await png(180, { bg: '#ffffff' }));
+
+    // Contenedor ICO con imágenes PNG embebidas (soportado por todos los navegadores modernos)
+    const sizes = [16, 32, 48];
+    const images = await Promise.all(sizes.map((s) => png(s)));
+    const header = Buffer.alloc(6);
+    header.writeUInt16LE(0, 0); // reservado
+    header.writeUInt16LE(1, 2); // tipo: icono
+    header.writeUInt16LE(sizes.length, 4);
+    let offset = 6 + 16 * sizes.length;
+    const entries = sizes.map((s, i) => {
+      const e = Buffer.alloc(16);
+      e.writeUInt8(s, 0);
+      e.writeUInt8(s, 1);
+      e.writeUInt8(0, 2); // paleta
+      e.writeUInt8(0, 3);
+      e.writeUInt16LE(1, 4); // planos
+      e.writeUInt16LE(32, 6); // bits por pixel
+      e.writeUInt32LE(images[i].length, 8);
+      e.writeUInt32LE(offset, 12);
+      offset += images[i].length;
+      return e;
+    });
+    await writeFile(path.join(ROOT, 'public', 'favicon.ico'), Buffer.concat([header, ...entries, ...images]));
+    console.log('✓ favicon.ico, favicon.png, apple-touch-icon.png');
   }
 } catch (err) {
   console.error('✗ favicon:', err.message);

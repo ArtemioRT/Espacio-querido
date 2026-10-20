@@ -28,6 +28,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add public/images scripts/team-preview.html
+          git add public/images public/favicon.ico scripts/team-preview.html
           git diff --cached --quiet && echo "Sin cambios" || git commit -m "Imágenes del sitio en WebP/SVG"
           git push
