@@ -86,18 +86,12 @@ Para la invitación por correo agrega también `https://tudominio.com/admin/rest
 Sin la clave, los formularios funcionan igual con un honeypot anti-spam.
 
 ### 5. Imágenes
-Copia tus archivos a `public/images/` con estos nombres (o cambia las rutas en `src/utils/content.ts`):
+Las imágenes del sitio actual se descargan y convierten automáticamente (WebP para fotos, WebP + SVG para logos):
 
-```
-public/images/
-  logo.svg              logo-white.svg        logo-icon-white.svg   favicon.png
-  hero.jpg
-  services/venta.jpg    compra.jpg            renta.jpg             inversion.jpg
-  banks/banamex.svg  banorte.svg  banregio.svg  hsbc.svg  santander.svg  afirme.svg
-        scotiabank.svg  mifel.svg  bbva.svg  infonavit.svg  cofinavit.svg  sofomes.svg
-  team/andres-quinones.jpg  alexa-espinoza.jpg  …  (nombre en minúsculas, sin acentos, con guiones)
-```
-Si falta una foto del equipo o un logo de banco, se muestran iniciales / el nombre.
+- **Desde GitHub (sin instalar nada):** pestaña **Actions → "Descargar imágenes del sitio" → Run workflow**. Al terminar, las imágenes quedan subidas en `public/images/` y Render vuelve a desplegar.
+- **En tu computadora:** `npm run images` (luego haz commit de `public/images/`).
+
+Las URLs y nombres están en `scripts/images.manifest.json`. Para revisar que cada foto del equipo tenga el nombre correcto abre `scripts/team-preview.html`; si alguna no coincide, cambia su `photo` en `src/utils/team.json`.
 
 ### 6. Deploy
 Es una SPA: configura el fallback a `index.html` (Vercel/Netlify lo hacen automático; en Netlify agrega `/* /index.html 200` en `public/_redirects`).

@@ -3,13 +3,14 @@
  * Coloca tus imágenes en /public/images con estos nombres (o cambia las rutas aquí).
  */
 import type { LeadInterest } from '@/types';
+import teamData from './team.json';
 
 export const IMAGES = {
   logo: '/images/logo.svg',
   logoWhite: '/images/logo-white.svg',
-  logoIcon: '/images/logo-icon-white.svg',
-  hero: '/images/hero.jpg',
-  authSide: '/images/hero.jpg',
+  logoIcon: '/images/logo-monogram.svg',
+  hero: '/images/hero.webp',
+  authSide: '/images/hero.webp',
   placeholder: '/images/placeholder-property.svg',
 };
 
@@ -25,14 +26,14 @@ export const SERVICES: ServiceItem[] = [
   {
     id: 'venta',
     title: 'Venta',
-    image: '/images/services/venta.jpg',
+    image: '/images/services/venta.webp',
     lines: ['¿Necesitas vender tu casa?', 'Te asesoramos, apoyamos y acompañamos durante todo el proceso.'],
     cta: '¡Quiero vender!',
   },
   {
     id: 'compra',
     title: 'Compra',
-    image: '/images/services/compra.jpg',
+    image: '/images/services/compra.webp',
     lines: [
       'Te apoyamos con las mejores opciones del mercado, de acuerdo a tus necesidades y presupuesto.',
       '¡Agenda tu consultoría de compra!',
@@ -42,7 +43,7 @@ export const SERVICES: ServiceItem[] = [
   {
     id: 'renta',
     title: 'Renta',
-    image: '/images/services/renta.jpg',
+    image: '/images/services/renta.webp',
     lines: [
       '¿Buscas una propiedad para rentar o quieres generar ingresos rentando tu inmueble?',
       '¡Nosotros te ayudamos!',
@@ -52,7 +53,7 @@ export const SERVICES: ServiceItem[] = [
   {
     id: 'inversion',
     title: 'Inversión',
-    image: '/images/services/inversion.jpg',
+    image: '/images/services/inversion.webp',
     lines: ['¿Quieres conocer distintas opciones de inversión?', '¡Agenda tu consultoría de inversión!'],
     cta: '¡Quiero invertir!',
   },
@@ -67,35 +68,25 @@ export const WHY_US = [
 ];
 
 export const BANKS = [
-  { name: 'Banamex', logo: '/images/banks/banamex.svg' },
-  { name: 'Banorte', logo: '/images/banks/banorte.svg' },
-  { name: 'Banregio', logo: '/images/banks/banregio.svg' },
-  { name: 'HSBC', logo: '/images/banks/hsbc.svg' },
-  { name: 'Santander', logo: '/images/banks/santander.svg' },
-  { name: 'Afirme', logo: '/images/banks/afirme.svg' },
-  { name: 'Scotiabank', logo: '/images/banks/scotiabank.svg' },
-  { name: 'Mifel', logo: '/images/banks/mifel.svg' },
-  { name: 'BBVA', logo: '/images/banks/bbva.svg' },
-  { name: 'Infonavit', logo: '/images/banks/infonavit.svg' },
-  { name: 'Cofinavit', logo: '/images/banks/cofinavit.svg' },
-  { name: 'Sofomes', logo: '/images/banks/sofomes.svg' },
+  { name: 'Banamex', logo: '/images/banks/banamex.webp' },
+  { name: 'Banorte', logo: '/images/banks/banorte.webp' },
+  { name: 'Banregio', logo: '/images/banks/banregio.webp' },
+  { name: 'HSBC', logo: '/images/banks/hsbc.webp' },
+  { name: 'Santander', logo: '/images/banks/santander.webp' },
+  { name: 'Afirme', logo: '/images/banks/afirme.webp' },
+  { name: 'Scotiabank', logo: '/images/banks/scotiabank.webp' },
+  { name: 'Inbursa', logo: '/images/banks/inbursa.webp' },
+  { name: 'BanBajío', logo: '/images/banks/banbajio.webp' },
+  { name: 'Infonavit', logo: '/images/banks/infonavit.webp' },
+  { name: 'Cofinavit', logo: '/images/banks/cofinavit.webp' },
+  { name: 'Sofomes', logo: '/images/banks/sofomes.webp' },
 ];
 
-const TEAM_NAMES = [
-  'Andrés Quiñones', 'Alexa Espinoza', 'Michelle Iracheta', 'Samuel Higareda',
-  'Alma Sandra Luévano', 'Pamela Martinez', 'Fernanda Rios', 'Alejandra Jaime',
-  'Melissa Justo', 'Diana Salazar', 'Diego Cervantes', 'Alejandro Mercadillo',
-  'Oscar Lozano', 'Perla Cavazos', 'Salma Romero', 'Antonio Valdivia',
-  'Alexia Francke', 'Gloria Gonzalez', 'Esmeralda Romero', 'Miguel Garcia',
-  'Rafael Rodriguez', 'Maria Abreu', 'Vania Bazua', 'Marcela Treviño',
-  'Raul Garcia', 'Carmen Trujillo', 'Lizzie Quiñones', 'Raziel Tovar',
-];
-
-const toFile = (name: string) =>
-  name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '-');
-
-// Ej: /images/team/andres-quinones.jpg
-export const TEAM = TEAM_NAMES.map((name) => ({ name, photo: `/images/team/${toFile(name)}.jpg` }));
+// Orden y foto de cada integrante: src/utils/team.json (fotos en /public/images/team/)
+export const TEAM = (teamData as Array<{ name: string; photo: string }>).map((m) => ({
+  name: m.name,
+  photo: `/images/team/${m.photo}`,
+}));
 
 export const FAQS = [
   {

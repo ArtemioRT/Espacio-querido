@@ -1,0 +1,64 @@
+{
+  "_info": "Imágenes del sitio actual (Wix). 'scale' multiplica el tamaño de la miniatura para descargar en alta resolución. 'svg': true genera además un SVG vectorizado (solo logos de un color).",
+  "items": [
+    { "out": "logo-icon", "scale": 8, "svg": true, "url": "https://static.wixstatic.com/media/0dcad2_c93a7b6ddfd04404a77de6111b56a9a7~mv2.png/v1/fill/w_31,h_31,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/CIRCULO_4x.png" },
+    { "out": "logo", "scale": 4, "svg": true, "white": "logo-white", "url": "https://static.wixstatic.com/media/0dcad2_292529a872244b7c967c657cc7b203e2~mv2.png/v1/fill/w_250,h_31,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/logo%20negro_4x.png" },
+    { "out": "logo-monogram", "scale": 3, "svg": true, "url": "https://static.wixstatic.com/media/0dcad2_1b8c29e7ff1b42cf9b20bae71b17f7a1~mv2.png/v1/fill/w_125,h_193,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Monograma%20%20beige_4x.png" },
+
+    { "out": "hero", "scale": 1.6, "maxWidth": 1920, "url": "https://static.wixstatic.com/media/0dcad2_79e7d152e3b84ba8a02a31af8d4bff4f~mv2.jpg/v1/fill/w_1225,h_1014,al_tr,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/0dcad2_79e7d152e3b84ba8a02a31af8d4bff4f~mv2.jpg" },
+
+    { "out": "services/venta", "scale": 3, "url": "https://static.wixstatic.com/media/a9c4bc9a700d4c72985d52576afe3581.jpg/v1/crop/x_67,y_0,w_2814,h_3150/fill/w_252,h_282,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Exterior%20de%20la%20casa%20suburbana%20moderna.jpg" },
+    { "out": "services/compra", "scale": 3, "url": "https://static.wixstatic.com/media/11062b_028243313b8f4477a5217ff5c601f9c5~mv2.jpg/v1/crop/x_969,y_0,w_2979,h_3333/fill/w_252,h_282,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Tomando%20la%20llave.jpg" },
+    { "out": "services/renta", "scale": 3, "url": "https://static.wixstatic.com/media/nsplsh_6fd6ead6ac744606adf0a777d2d1c1f0~mv2.jpg/v1/crop/x_0,y_833,w_3000,h_3357/fill/w_252,h_282,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Image%20by%20R%20ARCHITECTURE.jpg" },
+    { "out": "services/inversion", "scale": 3, "url": "https://static.wixstatic.com/media/11062b_b6d8601b48e94a3991ff66a548b1df1f~mv2.jpeg/v1/fill/w_252,h_282,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Edificio%20de%20apartamentos%20de%20varios%20pisos.jpeg" },
+
+    { "out": "decor/circles", "scale": 2, "url": "https://static.wixstatic.com/media/0dcad2_0c9e14dec2f1427d9192c5a2868b1190~mv2.png/v1/fill/w_593,h_593,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/circle.png" },
+    { "out": "decor/circles-bottom", "scale": 2, "url": "https://static.wixstatic.com/media/0dcad2_0c9e14dec2f1427d9192c5a2868b1190~mv2.png/v1/crop/x_0,y_2186,w_4000,h_1814/fill/w_706,h_320,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/0dcad2_0c9e14dec2f1427d9192c5a2868b1190~mv2.png" },
+    { "out": "decor/circles-top", "scale": 2, "url": "https://static.wixstatic.com/media/0dcad2_0c9e14dec2f1427d9192c5a2868b1190~mv2.png/v1/crop/x_0,y_0,w_4000,h_2061/fill/w_686,h_262,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/0dcad2_0c9e14dec2f1427d9192c5a2868b1190~mv2.png" },
+
+    { "out": "banks/banamex", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_a4fb6bc5e91e4d7489c06cd245fd5165~mv2.jpg/v1/crop/x_161,y_192,w_1979,h_1979/fill/w_129,h_129,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/BANAMEX_4x_edited.jpg" },
+    { "out": "banks/banorte", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_63282244607941d6a7cb424549e35c4e~mv2.png/v1/crop/x_325,y_325,w_3351,h_3351/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/BANORTE_4x.png" },
+    { "out": "banks/banregio", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_f10bba5ca46f43abb903160af13cb02d~mv2.png/v1/crop/x_649,y_649,w_2702,h_2702/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/BANREGIO_4x.png" },
+    { "out": "banks/hsbc", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_21c8002503454f758be45784ec446fe4~mv2.png/v1/crop/x_551,y_551,w_2900,h_2900/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/HSBC_4x.png" },
+    { "out": "banks/santander", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_18ae1a1c6ef849b481088d234644a341~mv2.png/v1/crop/x_446,y_446,w_3109,h_3109/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/SANTANDER_4x.png" },
+    { "out": "banks/afirme", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_4c50ae9aac144773b036bee22022a2e4~mv2.png/v1/crop/x_649,y_649,w_2702,h_2702/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/AFIRME_4x.png" },
+    { "out": "banks/scotiabank", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_0f6d490a68884f2780716bf48c675c0b~mv2.png/v1/crop/x_551,y_551,w_2900,h_2900/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/SCOTIA%20_4x.png" },
+    { "out": "banks/inbursa", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_3144d89885284b4eb925d52817d568ea~mv2.png/v1/crop/x_649,y_649,w_2702,h_2702/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/inbursa_4x.png" },
+    { "out": "banks/banbajio", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_a8a51cb605b7452890a7ade87a0ddea5~mv2.png/v1/crop/x_729,y_729,w_2543,h_2543/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/banbajio_4x.png" },
+    { "out": "banks/infonavit", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_3d995ac4bbc44f39974d05bfff3516b1~mv2.png/v1/crop/x_325,y_325,w_3351,h_3351/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/INFONAVIT_4x.png" },
+    { "out": "banks/cofinavit", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_a1a909783f624a059bf6436a7eb53493~mv2.png/v1/crop/x_649,y_649,w_2702,h_2702/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/COFINAVIT_4x.png" },
+    { "out": "banks/sofomes", "scale": 3, "url": "https://static.wixstatic.com/media/0dcad2_9e9df2c7f7c140c298ff377856efecb1~mv2.png/v1/crop/x_864,y_864,w_2274,h_2274/fill/w_129,h_129,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/SOFOMES_4x.png" }
+  ],
+
+  "_team_info": "Fotos del equipo en el orden en que aparecen en el sitio actual. Se guardan como team/01.webp … team/28.webp. Revisa team-preview.html y ajusta src/utils/team.ts si algún nombre no coincide.",
+  "team": [
+    "https://static.wixstatic.com/media/0dcad2_816eef804c6b428581a3b5ed095aee16~mv2.jpg/v1/crop/x_0,y_435,w_3475,h_3475/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6303.jpg",
+    "https://static.wixstatic.com/media/0dcad2_a4de12e884214478a8aed4f03072c2a4~mv2.jpg/v1/crop/x_0,y_386,w_3085,h_3085/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6241.jpg",
+    "https://static.wixstatic.com/media/0dcad2_76aac7a3f37c4f999dcfc6366e52c9c9~mv2.jpg/v1/crop/x_0,y_418,w_3338,h_3338/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-5912.jpg",
+    "https://static.wixstatic.com/media/0dcad2_e2ad5db24b844f5ab8833c88405afcd0~mv2.jpg/v1/crop/x_0,y_426,w_3408,h_3408/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-5929.jpg",
+    "https://static.wixstatic.com/media/0dcad2_3ee2675dab9b423ba68be86734e69cfc~mv2.jpg/v1/crop/x_0,y_417,w_3334,h_3334/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-5946.jpg",
+    "https://static.wixstatic.com/media/0dcad2_0b40307124ca4b269e75276364feb8dd~mv2.jpg/v1/crop/x_0,y_53,w_1024,h_1021/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202026-06-02%20at%204_54_edited.jpg",
+    "https://static.wixstatic.com/media/0dcad2_595d13bff2f74d3f9888002d049ff9b5~mv2.jpeg/v1/crop/x_0,y_0,w_960,h_960/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202026-03-03%20at%2012_00_41%20PM.jpeg",
+    "https://static.wixstatic.com/media/0dcad2_ce8972527cc34966a00f65f0d0fd2be3~mv2.jpg/v1/crop/x_0,y_85,w_1141,h_1141/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/ALEXA%20ESPINOSA_4x_edited.jpg",
+    "https://static.wixstatic.com/media/0dcad2_13a1229bf6ec4565815513283972670d~mv2.jpg/v1/crop/x_0,y_434,w_3469,h_3469/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6098.jpg",
+    "https://static.wixstatic.com/media/0dcad2_6fdf182445f642a58a0840136f44675a~mv2.jpg/v1/crop/x_0,y_392,w_3133,h_3133/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6195.jpg",
+    "https://static.wixstatic.com/media/0dcad2_1073ff4476b74e51af48d96fe619ee5c~mv2.jpg/v1/crop/x_0,y_410,w_3280,h_3280/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-5981.jpg",
+    "https://static.wixstatic.com/media/0dcad2_5ac2e742859f4dfd9786a74733bb3759~mv2.jpg/v1/crop/x_0,y_454,w_3633,h_3633/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6059.jpg",
+    "https://static.wixstatic.com/media/0dcad2_3525562495de48a4a517a2a229fce045~mv2.jpg/v1/crop/x_0,y_384,w_3068,h_3068/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6341.jpg",
+    "https://static.wixstatic.com/media/0dcad2_71a4d6d6afda437a9a7532f1fe7dc72b~mv2.png/v1/crop/x_46,y_0,w_868,h_868/fill/w_135,h_135,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202026-05-29%20at%205_edited_pn.png",
+    "https://static.wixstatic.com/media/0dcad2_da888e148963449680cec24894169e1e~mv2.jpg/v1/crop/x_0,y_300,w_2400,h_2400/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-WBG-3_edited.jpg",
+    "https://static.wixstatic.com/media/0dcad2_a2f2b09ef4ba45689f762f0084a8b4da~mv2.jpg/v1/crop/x_0,y_391,w_3124,h_3124/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6284.jpg",
+    "https://static.wixstatic.com/media/0dcad2_2887942fa1f3498bbda3397f0850aa83~mv2.jpg/v1/crop/x_0,y_427,w_3416,h_3416/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6321.jpg",
+    "https://static.wixstatic.com/media/0dcad2_65797035c426451aa0934f0a8302b917~mv2.jpg/v1/crop/x_0,y_447,w_3579,h_3579/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-5958.jpg",
+    "https://static.wixstatic.com/media/0dcad2_c192f7346cd042b2846dd2406fee8822~mv2.jpg/v1/crop/x_0,y_440,w_3520,h_3520/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6010.jpg",
+    "https://static.wixstatic.com/media/0dcad2_3053af5034264a898982b9b3e834ef6e~mv2.jpeg/v1/crop/x_0,y_160,w_960,h_960/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202026-03-04%20at%209_49_05%20PM.jpeg",
+    "https://static.wixstatic.com/media/0dcad2_2e31b482f0854418993e85cb88dacf01~mv2.jpeg/v1/crop/x_18,y_0,w_960,h_960/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202026-05-21%20at%203_16_51%20PM.jpeg",
+    "https://static.wixstatic.com/media/0dcad2_eb1cdcd498ec4cb5a42126a102822f18~mv2.jpg/v1/crop/x_0,y_394,w_3150,h_3150/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6299.jpg",
+    "https://static.wixstatic.com/media/0dcad2_3312fd4e0ece4b68b8f2a93fd2572c8b~mv2.jpg/v1/crop/x_0,y_300,w_2400,h_2400/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-WBG-8_edited.jpg",
+    "https://static.wixstatic.com/media/0dcad2_473f1b03100e4eb8893fecbc3270ff09~mv2.jpg/v1/crop/x_0,y_451,w_3606,h_3606/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6101.jpg",
+    "https://static.wixstatic.com/media/0dcad2_511da151154f44abad51c98819931e6c~mv2.jpg/v1/crop/x_0,y_433,w_3461,h_3461/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/EQ-6074.jpg",
+    "https://static.wixstatic.com/media/0dcad2_c1c88fc472a34eaf97a1f8e3f81561da~mv2.png/v1/crop/x_0,y_3,w_1200,h_1200/fill/w_135,h_135,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202026-06-02%20at%204_edited.png",
+    "https://static.wixstatic.com/media/0dcad2_e690d660c7a948f28aeffbb48b38fc48~mv2.jpeg/v1/crop/x_0,y_174,w_1252,h_1252/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202026-06-02%20at%204_45_43%20PM.jpeg",
+    "https://static.wixstatic.com/media/0dcad2_93b6a08e8fc14b8dae318c5f86b62578~mv2.jpg/v1/crop/x_0,y_0,w_2048,h_2045/fill/w_135,h_135,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/WhatsApp%20Image%202026-05-22%20at%201_22_edited.jpg"
+  ]
+}

@@ -1,0 +1,33 @@
+name: Descargar imágenes del sitio
+
+# Ejecútalo desde GitHub → Actions → "Descargar imágenes del sitio" → Run workflow.
+# Descarga las imágenes de Wix, las convierte a WebP/SVG y las sube al repo.
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Volver a descargar aunque ya existan'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run images -- ${{ inputs.force && '--force' || '' }}
+      - name: Subir imágenes al repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add public/images scripts/team-preview.html
+          git diff --cached --quiet && echo "Sin cambios" || git commit -m "Imágenes del sitio en WebP/SVG"
+          git push
