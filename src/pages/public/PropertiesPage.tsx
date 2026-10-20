@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { SearchX, SlidersHorizontal, X } from 'lucide-react';
 import PropertyCard, { PropertyCardSkeleton } from '@/components/properties/PropertyCard';
 import PropertyFilters from '@/components/properties/PropertyFilters';
@@ -174,17 +174,6 @@ export default function PropertiesPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Sub-zonas con propiedades (enlaces internos, buenos para SEO)
-  const subzones = useMemo(() => {
-    const st = facet.state ? tree[facet.state] : undefined;
-    if (!facet.state) return Object.entries(tree).map(([slug, n]) => ({ slug, name: n.name, total: n.total, to: catalogPath({ ...facet, state: slug }) }));
-    if (st && !facet.city)
-      return Object.entries(st.cities).map(([slug, n]) => ({ slug, name: n.name, total: n.total, to: catalogPath({ ...facet, city: slug }) }));
-    const ct = st && facet.city ? st.cities[facet.city] : undefined;
-    if (ct && !facet.neighborhood) return ct.neighborhoods.map((n) => ({ ...n, to: catalogPath({ ...facet, neighborhood: n.slug }) }));
-    return [];
-  }, [tree, facet]);
-
   // Chips de filtros activos
   const activeChips: Array<{ key: string; label: string; remove: () => void }> = [];
   if (filters.agent) activeChips.push({ key: 'agent', label: `Asesor: ${agent?.full_name ?? '…'}`, remove: () => update({ agent: undefined }) });
@@ -302,20 +291,6 @@ export default function PropertiesPage() {
 
           <Pagination page={filters.page ?? 1} total={count} pageSize={PAGE_SIZE} onChange={goToPage} />
 
-          {subzones.length > 0 && (
-            <nav className={styles.zones} aria-label="Buscar por zona">
-              <h2>{facet.city ? 'Colonias' : facet.state ? 'Municipios' : 'Estados'} con propiedades</h2>
-              <ul>
-                {subzones.map((z) => (
-                  <li key={z.slug}>
-                    <Link to={z.to}>
-                      {z.name} <span>({z.total})</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          )}
         </section>
       </div>
     </div>
