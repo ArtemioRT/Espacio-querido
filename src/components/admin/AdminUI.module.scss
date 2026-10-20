@@ -30,6 +30,7 @@
   border: 1px solid $color-border;
   border-radius: $radius-lg;
   overflow: hidden;
+  overflow: clip; // conserva las esquinas sin romper position: sticky dentro del panel
   min-width: 0;
 }
 

@@ -187,30 +187,88 @@ export async function getLocationSuggestions(): Promise<Array<{ label: string; k
 // ---------------------------------------------------------------------
 // Admin
 // ---------------------------------------------------------------------
-export async function listAdminProperties(opts: {
+export interface AdminListFilters {
   status?: PropertyStatus | 'all';
   agent?: string | 'all' | 'none';
   q?: string;
-  page?: number;
-  pageSize?: number;
-}): Promise<{ data: Property[]; count: number }> {
-  const pageSize = opts.pageSize ?? 15;
-  const page = Math.max(1, opts.page ?? 1);
-  let query = supabase.from('properties').select(ADMIN_LIST_FIELDS, { count: 'exact' });
-  if (opts.status && opts.status !== 'all') query = query.eq('status', opts.status);
-  if (opts.agent === 'none') query = query.is('agent_id', null);
-  else if (opts.agent && opts.agent !== 'all') query = query.eq('agent_id', opts.agent);
+}
+
+/** Aplica los filtros del listado del panel a una consulta */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applyAdminFilters<Q extends { eq: any; is: any; or: any }>(query: Q, opts: AdminListFilters): Q {
+  let q = query;
+  if (opts.status && opts.status !== 'all') q = q.eq('status', opts.status);
+  if (opts.agent === 'none') q = q.is('agent_id', null);
+  else if (opts.agent && opts.agent !== 'all') q = q.eq('agent_id', opts.agent);
   if (opts.q) {
     const t = sanitize(opts.q);
     if (t) {
       const byCode = /^\d+$/.test(t) ? `,code.eq.${t}` : '';
-      query = query.or(`title.ilike.%${t}%,neighborhood.ilike.%${t}%,city.ilike.%${t}%,easybroker_id.ilike.%${t}%${byCode}`);
+      q = q.or(`title.ilike.%${t}%,neighborhood.ilike.%${t}%,city.ilike.%${t}%,easybroker_id.ilike.%${t}%${byCode}`);
     }
   }
+  return q;
+}
+
+export async function listAdminProperties(opts: AdminListFilters & { page?: number; pageSize?: number }): Promise<{ data: Property[]; count: number }> {
+  const pageSize = opts.pageSize ?? 15;
+  const page = Math.max(1, opts.page ?? 1);
+  const query = applyAdminFilters(supabase.from('properties').select(ADMIN_LIST_FIELDS, { count: 'exact' }), opts);
   const from = (page - 1) * pageSize;
   const { data, error, count } = await query.order('updated_at', { ascending: false }).range(from, from + pageSize - 1);
   if (error) throw error;
   return { data: (data ?? []) as unknown as Property[], count: count ?? 0 };
+}
+
+/** Todos los IDs que coinciden con los filtros (para "seleccionar todas") */
+export async function listAdminPropertyIds(opts: AdminListFilters): Promise<string[]> {
+  const ids: string[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await applyAdminFilters(supabase.from('properties').select('id'), opts)
+      .order('updated_at', { ascending: false })
+      .range(from, from + 999);
+    if (error) throw error;
+    ids.push(...(data ?? []).map((r: { id: string }) => r.id));
+    if (!data || data.length < 1000) break;
+  }
+  return ids;
+}
+
+// ---------------------------------------------------------------------
+// Acciones masivas (por bloques para no exceder el tamaño de la URL)
+// ---------------------------------------------------------------------
+const chunk = <T,>(arr: T[], size: number) => Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size));
+
+async function bulkPatch(ids: string[], patch: Record<string, unknown>, onProgress?: (done: number) => void) {
+  let done = 0;
+  for (const part of chunk(ids, 150)) {
+    const { error } = await supabase.from('properties').update(patch).in('id', part);
+    if (error) throw error;
+    done += part.length;
+    onProgress?.(done);
+  }
+}
+
+export const bulkUpdateStatus = (ids: string[], status: PropertyStatus, onProgress?: (n: number) => void) =>
+  bulkPatch(ids, { status }, onProgress);
+
+export const bulkAssignAgent = (ids: string[], agentId: string | null, onProgress?: (n: number) => void) =>
+  bulkPatch(ids, { agent_id: agentId }, onProgress);
+
+export const bulkSetFeatured = (ids: string[], featured: boolean, onProgress?: (n: number) => void) =>
+  bulkPatch(ids, { featured }, onProgress);
+
+export async function bulkDelete(ids: string[], onProgress?: (n: number) => void) {
+  let done = 0;
+  for (const part of chunk(ids, 100)) {
+    const { data: imgs } = await supabase.from('property_images').select('storage_path').in('property_id', part);
+    const paths = (imgs ?? []).map((i) => i.storage_path).filter(Boolean) as string[];
+    for (const p of chunk(paths, 500)) await supabase.storage.from(STORAGE_BUCKET).remove(p);
+    const { error } = await supabase.from('properties').delete().in('id', part);
+    if (error) throw error;
+    done += part.length;
+    onProgress?.(done);
+  }
 }
 
 export async function getStatusCounts(agent?: string | 'all' | 'none'): Promise<Record<PropertyStatus | 'all', number>> {

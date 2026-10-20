@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Building2, ChevronDown, Copy, Download, ExternalLink, Eye, Pencil, Plus, Search, Star, Trash2,
+  Building2, CheckSquare, ChevronDown, Copy, Download, ExternalLink, Eye, Pencil, Plus, Search, Star, Trash2, X,
 } from 'lucide-react';
 import { ConfirmDialog, PageHeader, Panel, Tabs } from '@/components/admin/AdminUI';
 import EasyBrokerImportModal from '@/components/admin/EasyBrokerImportModal';
 import Pagination from '@/components/ui/Pagination';
 import Avatar from '@/components/ui/Avatar';
 import {
-  assignAgent, deleteProperty, duplicateProperty, getStatusCounts, listAdminProperties, toggleFeatured, updatePropertyStatus,
+  assignAgent, bulkAssignAgent, bulkDelete, bulkSetFeatured, bulkUpdateStatus, deleteProperty, duplicateProperty, getStatusCounts,
+  listAdminProperties, listAdminPropertyIds, toggleFeatured, updatePropertyStatus,
 } from '@/services/properties.service';
 import { listAssignableAgents } from '@/services/agents.service';
 import { useAuth } from '@/context/AuthContext';
@@ -58,6 +59,59 @@ export default function AdminPropertiesPage() {
   const [toDelete, setToDelete] = useState<Property | null>(null);
   const [busy, setBusy] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // ---------- Selección masiva ----------
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selectingAll, setSelectingAll] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState<string | null>(null); // texto de progreso
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+
+  // Cambiar filtros limpia la selección (evita aplicar cambios a propiedades que ya no se ven)
+  useEffect(() => setSelected(new Set()), [tab, q, agentFilter]);
+
+  const pageIds = rows.map((r) => r.id);
+  const allOnPage = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+  const togglePage = () =>
+    setSelected((s) => {
+      const n = new Set(s);
+      pageIds.forEach((id) => (allOnPage ? n.delete(id) : n.add(id)));
+      return n;
+    });
+  const toggleOne = (id: string) =>
+    setSelected((s) => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+
+  const selectAllMatching = async () => {
+    setSelectingAll(true);
+    try {
+      setSelected(new Set(await listAdminPropertyIds({ status: tab, q, agent: agentFilter })));
+    } catch (err) {
+      toast((err as Error).message, 'error');
+    } finally {
+      setSelectingAll(false);
+    }
+  };
+
+  /** Ejecuta una acción masiva con progreso, recarga y limpia la selección */
+  const runBulk = async (label: string, fn: (ids: string[], onProgress: (n: number) => void) => Promise<void>, done: string) => {
+    const ids = [...selected];
+    if (!ids.length) return;
+    setBulkBusy(`${label} 0 de ${ids.length.toLocaleString('es-MX')}…`);
+    try {
+      await fn(ids, (n) => setBulkBusy(`${label} ${n.toLocaleString('es-MX')} de ${ids.length.toLocaleString('es-MX')}…`));
+      toast(done.replace('{n}', ids.length.toLocaleString('es-MX')));
+      setSelected(new Set());
+      await load();
+    } catch (err) {
+      toast((err as Error).message || 'No se pudo completar la acción', 'error');
+      load();
+    } finally {
+      setBulkBusy(null);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -154,7 +208,7 @@ export default function AdminPropertiesPage() {
         title={isAdmin ? 'Propiedades' : 'Mis propiedades'}
         subtitle={
           isAdmin
-            ? 'Administra tu inventario: activas, borradores y finalizadas (vendidas o rentadas).'
+            ? 'Administra tu inventario: activas, borradores, en pausa y finalizadas (vendidas o rentadas).'
             : 'Propiedades asignadas a ti. Puedes subir nuevas, editarlas y cambiar su estado.'
         }
         actions={
@@ -225,6 +279,87 @@ export default function AdminPropertiesPage() {
           )}
         </div>
 
+        {rows.length > 0 && (
+          <div className={cx(styles.bulkBar, selected.size > 0 && styles.bulkBarActive)}>
+            <label className="checkbox">
+              <input type="checkbox" checked={allOnPage} onChange={togglePage} disabled={!!bulkBusy} aria-label="Seleccionar página" />
+              {selected.size ? `${selected.size.toLocaleString('es-MX')} seleccionadas` : 'Seleccionar página'}
+            </label>
+            {count > rows.length && selected.size < count && (
+              <button className={styles.linkBtn} onClick={selectAllMatching} disabled={selectingAll || !!bulkBusy}>
+                {selectingAll ? <span className="spinner spinner--sm" /> : <CheckSquare />} Seleccionar las {count.toLocaleString('es-MX')} de este filtro
+              </button>
+            )}
+
+            {selected.size > 0 && (
+              <div className={styles.bulkActions}>
+                {bulkBusy ? (
+                  <span className={styles.bulkProgress}>
+                    <span className="spinner spinner--sm" /> {bulkBusy}
+                  </span>
+                ) : (
+                  <>
+                    <select
+                      className={cx('select', styles.bulkSelect)}
+                      value=""
+                      onChange={(e) => {
+                        const st = e.target.value as PropertyStatus;
+                        if (st) runBulk('Actualizando', (ids, cb) => bulkUpdateStatus(ids, st, cb), `{n} propiedades cambiadas a ${STATUS_LABELS[st]}`);
+                      }}
+                      aria-label="Cambiar estado"
+                    >
+                      <option value="">Cambiar estado…</option>
+                      {(['active', 'draft', 'paused', 'finished'] as PropertyStatus[]).map((st) => (
+                        <option key={st} value={st}>
+                          {STATUS_LABELS[st]}
+                        </option>
+                      ))}
+                    </select>
+                    {isAdmin && (
+                      <select
+                        className={cx('select', styles.bulkSelect)}
+                        value=""
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (!v) return;
+                          const agentId = v === 'none' ? null : v;
+                          const name = agentId ? agents.find((a) => a.id === agentId)?.full_name : 'sin asignar';
+                          runBulk('Asignando', (ids, cb) => bulkAssignAgent(ids, agentId, cb), `{n} propiedades asignadas a ${name}`);
+                        }}
+                        aria-label="Asignar asesor"
+                      >
+                        <option value="">Asignar asesor…</option>
+                        <option value="none">Sin asignar</option>
+                        {agents.map((a) => (
+                          <option key={a.id} value={a.id}>
+                            {a.full_name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    {isAdmin && (
+                      <>
+                        <button className="btn btn--ghost btn--sm" onClick={() => runBulk('Destacando', (ids, cb) => bulkSetFeatured(ids, true, cb), '{n} propiedades destacadas')}>
+                          <Star /> Destacar
+                        </button>
+                        <button className="btn btn--ghost btn--sm" onClick={() => runBulk('Actualizando', (ids, cb) => bulkSetFeatured(ids, false, cb), 'Se quitaron {n} de destacadas')}>
+                          Quitar destacado
+                        </button>
+                        <button className={cx('btn btn--ghost btn--sm', styles.danger)} onClick={() => setBulkDeleteOpen(true)}>
+                          <Trash2 /> Eliminar
+                        </button>
+                      </>
+                    )}
+                    <button className={styles.iconBtn} onClick={() => setSelected(new Set())} aria-label="Quitar selección" title="Quitar selección">
+                      <X />
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {loading ? (
           <div className="page-loader" style={{ minHeight: 260 }}>
             <div className="spinner" />
@@ -238,7 +373,10 @@ export default function AdminPropertiesPage() {
         ) : (
           <ul className={styles.list}>
             {rows.map((p) => (
-              <li key={p.id} className={styles.row}>
+              <li key={p.id} className={cx(styles.row, selected.has(p.id) && styles.rowSelected)}>
+                <label className={styles.rowCheck}>
+                  <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggleOne(p.id)} aria-label={`Seleccionar ${p.title}`} />
+                </label>
                 <Link to={editPropertyUrl(p.id)} className={styles.thumb}>
                   <img src={p.cover_image_url || IMAGES.placeholder} alt="" loading="lazy" />
                 </Link>
@@ -319,6 +457,24 @@ export default function AdminPropertiesPage() {
       </Panel>
 
       <Pagination page={page} total={count} pageSize={PAGE_SIZE} onChange={setPage} />
+
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        title={`Eliminar ${selected.size.toLocaleString('es-MX')} propiedades`}
+        message={
+          <>
+            Se eliminarán <strong>{selected.size.toLocaleString('es-MX')}</strong> propiedades con todas sus fotos. Esta acción no se puede deshacer. Si solo
+            quieres ocultarlas, mejor cámbialas a <em>En pausa</em>.
+          </>
+        }
+        confirmLabel="Eliminar"
+        danger
+        onConfirm={() => {
+          setBulkDeleteOpen(false);
+          runBulk('Eliminando', bulkDelete, '{n} propiedades eliminadas');
+        }}
+        onCancel={() => setBulkDeleteOpen(false)}
+      />
 
       <EasyBrokerImportModal open={importOpen} onClose={() => setImportOpen(false)} onImported={load} />
 
