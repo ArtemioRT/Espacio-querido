@@ -524,7 +524,7 @@ export default function PropertyEditorPage() {
         <aside className={styles.aside}>
           <Panel title="Publicación">
             <div className={styles.statusList}>
-              {(['active', 'draft', 'finished'] as PropertyStatus[]).map((s) => (
+              {(['active', 'draft', 'paused', 'finished'] as PropertyStatus[]).map((s) => (
                 <label key={s} className={cx(styles.statusOpt, form.status === s && styles.statusOn)}>
                   <input type="radio" name="status" checked={form.status === s} onChange={() => set('status', s)} />
                   <div>
@@ -533,6 +533,7 @@ export default function PropertyEditorPage() {
                       {s === 'active' && 'Visible en el sitio y el buscador'}
                       {s === 'draft' && 'Oculta; solo la ve el equipo'}
                       {s === 'finished' && `Marcada como ${form.operation_type === 'sale' ? 'vendida' : 'rentada'}`}
+                      {s === 'paused' && 'Guardada sin publicar hasta que la reactives'}
                     </span>
                   </div>
                 </label>

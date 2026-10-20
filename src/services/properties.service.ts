@@ -221,12 +221,19 @@ export async function getStatusCounts(agent?: string | 'all' | 'none'): Promise<
     else if (agent && agent !== 'all') q = q.eq('agent_id', agent);
     return q;
   };
-  const [all, active, draft, finished] = await Promise.all([head(), head('active'), head('draft'), head('finished')]);
+  const [all, active, draft, finished, paused] = await Promise.all([
+    head(),
+    head('active'),
+    head('draft'),
+    head('finished'),
+    head('paused'),
+  ]);
   return {
     all: all.count ?? 0,
     active: active.count ?? 0,
     draft: draft.count ?? 0,
     finished: finished.count ?? 0,
+    paused: paused.count ?? 0,
   };
 }
 

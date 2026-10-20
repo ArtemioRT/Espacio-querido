@@ -51,7 +51,7 @@ export default function AdminPropertiesPage() {
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<Property[]>([]);
   const [count, setCount] = useState(0);
-  const [counts, setCounts] = useState<Record<TabValue, number>>({ all: 0, active: 0, draft: 0, finished: 0 });
+  const [counts, setCounts] = useState<Record<TabValue, number>>({ all: 0, active: 0, draft: 0, finished: 0, paused: 0 });
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -204,6 +204,7 @@ export default function AdminPropertiesPage() {
             { value: 'active', label: 'Activo', count: counts.active },
             { value: 'draft', label: 'Borrador', count: counts.draft },
             { value: 'finished', label: 'Finalizado', count: counts.finished },
+            { value: 'paused', label: 'En pausa', count: counts.paused },
           ]}
         />
         <div className={styles.toolbar}>
@@ -285,6 +286,7 @@ export default function AdminPropertiesPage() {
                     <option value="active">Activo</option>
                     <option value="draft">Borrador</option>
                     <option value="finished">Finalizado ({p.operation_type === 'sale' ? 'vendida' : 'rentada'})</option>
+                    <option value="paused">En pausa</option>
                   </select>
                   <div className={styles.actions}>
                     {isAdmin && (

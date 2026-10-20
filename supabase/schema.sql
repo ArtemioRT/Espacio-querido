@@ -14,8 +14,10 @@ create extension if not exists "unaccent" with schema extensions;
 do $$ begin create type public.user_role as enum ('admin','agent','user');
 exception when duplicate_object then null; end $$;
 
-do $$ begin create type public.property_status as enum ('active','draft','finished');
+do $$ begin create type public.property_status as enum ('active','draft','finished','paused');
 exception when duplicate_object then null; end $$;
+-- "En pausa": oculta del sitio y guardada hasta reactivarla (migración desde versiones anteriores)
+alter type public.property_status add value if not exists 'paused';
 
 do $$ begin create type public.operation_type as enum ('sale','rent');
 exception when duplicate_object then null; end $$;
@@ -679,11 +681,12 @@ $$;
 grant execute on function public.get_public_agent(uuid) to anon, authenticated;
 
 -- Listado de asesores con métricas (solo admin)
+drop function if exists public.get_agents_overview();
 create or replace function public.get_agents_overview()
 returns table (
   id uuid, email text, full_name text, avatar_url text, phone text, whatsapp text, title text,
   role public.user_role, active boolean, created_at timestamptz, last_sign_in_at timestamptz,
-  active_count bigint, draft_count bigint, finished_count bigint, leads_count bigint
+  active_count bigint, draft_count bigint, finished_count bigint, paused_count bigint, leads_count bigint
 ) language plpgsql stable security definer set search_path = public as $$
 begin
   if not public.is_admin() then
@@ -695,6 +698,7 @@ begin
          count(p.id) filter (where p.status = 'active'),
          count(p.id) filter (where p.status = 'draft'),
          count(p.id) filter (where p.status = 'finished'),
+         count(p.id) filter (where p.status::text = 'paused'),
          (select count(*) from public.leads l where l.agent_id = pr.id)
   from public.profiles pr
   left join auth.users u on u.id = pr.id

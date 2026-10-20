@@ -1,5 +1,5 @@
 export type UserRole = 'admin' | 'agent' | 'user';
-export type PropertyStatus = 'active' | 'draft' | 'finished';
+export type PropertyStatus = 'active' | 'draft' | 'finished' | 'paused';
 export type OperationType = 'sale' | 'rent';
 export type PropertyType = 'casa' | 'departamento' | 'terreno' | 'oficina' | 'local' | 'bodega' | 'otro';
 export type Currency = 'MXN' | 'USD';
@@ -38,6 +38,7 @@ export interface AgentOverview extends Omit<Profile, 'created_at'> {
   active_count: number;
   draft_count: number;
   finished_count: number;
+  paused_count: number;
   leads_count: number;
 }
 

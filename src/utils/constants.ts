@@ -52,12 +52,14 @@ export const STATUS_LABELS: Record<PropertyStatus, string> = {
   active: 'Activo',
   draft: 'Borrador',
   finished: 'Finalizado',
+  paused: 'En pausa',
 };
 
 export const STATUS_BADGE: Record<PropertyStatus, string> = {
   active: 'badge--success',
   draft: 'badge--muted',
   finished: 'badge--primary',
+  paused: 'badge--warning',
 };
 
 export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {

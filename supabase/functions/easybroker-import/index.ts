@@ -8,7 +8,7 @@
 // Body:
 //   { action: 'list', page?: number }
 //   { action: 'ids' }  → todos los public_id (todas las páginas) y si ya están importados
-//   { action: 'import', ids: string[], status?: 'draft' | 'active', agent_id?: string | 'auto' }
+//   { action: 'import', ids: string[], status?: 'draft' | 'active' | 'paused', agent_id?: string | 'auto' }
 //     agent_id 'auto' (o vacío): asigna al asesor cuyo correo coincida con el agente de EasyBroker
 // Solo administradores.
 
@@ -236,7 +236,7 @@ Deno.serve(async (req) => {
     // 3) Importar
     if (body.action === 'import') {
       const ids: string[] = Array.isArray(body.ids) ? body.ids.slice(0, 50) : [];
-      const status = body.status === 'active' ? 'active' : 'draft';
+      const status = ['active', 'paused'].includes(body.status) ? body.status : 'draft';
       if (!ids.length) return json({ error: 'No se enviaron propiedades' }, 400);
 
       const fixedAgent = typeof body.agent_id === 'string' && /^[0-9a-f-]{36}$/i.test(body.agent_id) ? body.agent_id : null;

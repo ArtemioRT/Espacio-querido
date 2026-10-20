@@ -293,6 +293,10 @@ export default function AgentsPage() {
                     <span>Borrador</span>
                   </div>
                   <div>
+                    <strong>{a.paused_count}</strong>
+                    <span>En pausa</span>
+                  </div>
+                  <div>
                     <strong>{a.finished_count}</strong>
                     <span>Finalizadas</span>
                   </div>
@@ -493,7 +497,7 @@ export default function AgentsPage() {
             </div>
 
             <p className="field__hint span-full">
-              Alta: {formatDate(editing.created_at)} · {editing.active_count + editing.draft_count + editing.finished_count} propiedades asignadas
+              Alta: {formatDate(editing.created_at)} · {editing.active_count + editing.draft_count + editing.finished_count + editing.paused_count} propiedades asignadas
             </p>
           </div>
         )}
@@ -504,7 +508,7 @@ export default function AgentsPage() {
         title="Eliminar asesor"
         message={
           <>
-            ¿Eliminar a <strong>{toDelete?.full_name}</strong>? Perderá el acceso y sus {(toDelete?.active_count ?? 0) + (toDelete?.draft_count ?? 0) + (toDelete?.finished_count ?? 0)} propiedades quedarán
+            ¿Eliminar a <strong>{toDelete?.full_name}</strong>? Perderá el acceso y sus {(toDelete?.active_count ?? 0) + (toDelete?.draft_count ?? 0) + (toDelete?.finished_count ?? 0) + (toDelete?.paused_count ?? 0)} propiedades quedarán
             sin asignar. Si solo quieres quitarle el acceso, mejor <em>desactiva</em> su cuenta.
           </>
         }

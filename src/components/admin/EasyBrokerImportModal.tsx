@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CheckSquare, RefreshCw, Square, XCircle } from 'lucide-react';
 import { Modal } from './AdminUI';
 import Pagination from '@/components/ui/Pagination';
-import { importEasyBrokerProperties, listAllEasyBrokerIds, listEasyBrokerProperties } from '@/services/easybroker.service';
+import { importEasyBrokerProperties, listAllEasyBrokerIds, listEasyBrokerProperties, type ImportStatus } from '@/services/easybroker.service';
 import { listAssignableAgents } from '@/services/agents.service';
 import { cx } from '@/utils/format';
 import type { AgentRef, EasyBrokerImportResult, EasyBrokerListItem } from '@/types';
@@ -22,7 +22,7 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [status, setStatus] = useState<'draft' | 'active'>('draft');
+  const [status, setStatus] = useState<ImportStatus>('draft');
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState<EasyBrokerImportResult[] | null>(null);
   const [agents, setAgents] = useState<AgentRef[]>([]);
@@ -149,9 +149,10 @@ export default function EasyBrokerImportModal({ open, onClose, onImported }: Pro
             <label className="field__label" htmlFor="eb-status">
               Importar como
             </label>
-            <select id="eb-status" className="select" value={status} onChange={(e) => setStatus(e.target.value as 'draft' | 'active')}>
+            <select id="eb-status" className="select" value={status} onChange={(e) => setStatus(e.target.value as ImportStatus)}>
               <option value="draft">Borrador</option>
               <option value="active">Activo (publicar)</option>
+              <option value="paused">En pausa</option>
             </select>
             <select className="select" value={agentId} onChange={(e) => setAgentId(e.target.value)} aria-label="Asignar a">
               <option value="auto">Asesor: automático (por correo)</option>

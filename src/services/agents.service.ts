@@ -51,6 +51,7 @@ export async function getAgentsOverview(): Promise<AgentOverview[]> {
     active_count: Number(a.active_count),
     draft_count: Number(a.draft_count),
     finished_count: Number(a.finished_count),
+    paused_count: Number(a.paused_count ?? 0),
     leads_count: Number(a.leads_count),
   }));
 }

@@ -240,6 +240,12 @@
   background-color: color.adjust($color-success, $lightness: 57%);
 }
 
+.status_paused {
+  border-color: rgba($color-warning, 0.5);
+  color: color.adjust($color-warning, $lightness: -8%);
+  background-color: color.adjust($color-warning, $lightness: 52%);
+}
+
 .status_draft {
   color: $color-muted;
   background-color: #f6f6f6;

@@ -29,5 +29,7 @@ export const listAllEasyBrokerIds = () =>
   invoke<{ items: Array<{ public_id: string; imported: boolean }> }>({ action: 'ids' }).then((r) => r.items);
 
 /** agentId: id de un asesor, o 'auto' para asignar por el correo del agente en EasyBroker */
-export const importEasyBrokerProperties = (ids: string[], status: 'draft' | 'active', agentId: string | 'auto' = 'auto') =>
+export type ImportStatus = 'draft' | 'active' | 'paused';
+
+export const importEasyBrokerProperties = (ids: string[], status: ImportStatus, agentId: string | 'auto' = 'auto') =>
   invoke<{ results: EasyBrokerImportResult[] }>({ action: 'import', ids, status, agent_id: agentId });
